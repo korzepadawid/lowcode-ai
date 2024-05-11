@@ -1,5 +1,6 @@
 services:
   lowcode-ai:
+    image: lowcode-ai:latest
     build: .
     ports:
       - "8000:8000"

@@ -1,7 +1,8 @@
 services:
   lowcode-ai:
-    image: lowcode-ai:latest
-    build: .
+    image: ghcr.io/korzepadawid/lowcode-ai:latest
+    build:
+      context: .
     ports:
       - "8000:8000"
     environment:

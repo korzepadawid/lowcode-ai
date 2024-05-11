@@ -1,0 +1,10 @@
+services:
+  lowcode-ai:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: lowcode
+      DATABASE_HOST: localhost

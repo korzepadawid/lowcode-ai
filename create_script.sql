@@ -3,7 +3,6 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'lowcode')\gexec;
 
 CREATE TABLE IF NOT EXISTS thread (
     id VARCHAR PRIMARY KEY,
-    open_ai_id VARCHAR,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
 );
 

@@ -31,9 +31,7 @@ async def create_thread(session: AsyncSession = Depends(get_session)):
     thread ID, generates a new UUID for the thread, and stores the thread
     information in the database.
     """
-    empty_thread = client.beta.threads.create(timeout=timeout)
-    log.info(f"saved thread to OpenAI {empty_thread.id}")
-    new_thread = Thread(id=str(uuid.uuid4()), open_ai_id=empty_thread.id)
+    new_thread = Thread(id=str(uuid.uuid4()))
     session.add(new_thread)
     await session.commit()
     return {"id": new_thread.id, "created_at": new_thread.created_at}

@@ -8,7 +8,6 @@ Base = declarative_base()
 class Thread(Base):
     __tablename__ = "thread"
     id = Column(String, primary_key=True)
-    open_ai_id = Column(String)
     created_at = Column(DateTime, server_default=func.now())
     messages = relationship("Message", back_populates="thread")
 

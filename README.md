@@ -24,3 +24,9 @@ $ make initdb
 ```
 $ make rmdb
 ```
+
+# How to run on a local setup?
+
+```
+$ make dev
+```

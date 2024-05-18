@@ -3,3 +3,6 @@ initdb:
 
 rmdb:
 	docker rm --force lowcode_db
+
+dev:
+	uvicorn main:app --reload --log-level debug

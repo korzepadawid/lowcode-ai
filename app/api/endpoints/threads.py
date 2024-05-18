@@ -25,11 +25,10 @@ timeout = httpx.Timeout(timeout=10.0, connect=5.0)
 @router.post(path=BASE_URL, status_code=status.HTTP_201_CREATED)
 async def create_thread(session: AsyncSession = Depends(get_session)):
     """
-    Creates a new thread using the OpenAI API and saves it to the database.
+    Creates a new thread and saves it to the database.
 
-    This function creates an empty thread through the OpenAI API, logs the
-    thread ID, generates a new UUID for the thread, and stores the thread
-    information in the database.
+    This function generates a new thread with a unique UUID, logs the creation, 
+    and stores the thread information in the database.
     """
     new_thread = Thread(id=str(uuid.uuid4()))
     session.add(new_thread)

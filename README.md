@@ -45,5 +45,5 @@ OPEN_AI_PROJECT_ID=
 ```
 
 ```
-$ docker run -p8000:8000 --env-file .env_example lowcode-ai
+$ docker run -p8000:8000 --env-file .env_example ghcr.io/korzepadawid/lowcode-ai:latest
 ```

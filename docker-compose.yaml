@@ -1,0 +1,12 @@
+services:
+  lowcode-ai:
+    image: ghcr.io/korzepadawid/lowcode-ai:latest
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: lowcode
+      DATABASE_HOST: localhost

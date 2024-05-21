@@ -1,5 +1,5 @@
-SELECT 'CREATE DATABASE LowCodeAI' 
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'LowCodeAI')\gexec;
+SELECT 'CREATE DATABASE lowcode' 
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'lowcode')\gexec;
 
 CREATE TABLE IF NOT EXISTS thread (
     id VARCHAR PRIMARY KEY,

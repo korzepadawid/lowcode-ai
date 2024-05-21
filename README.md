@@ -24,3 +24,26 @@ $ make initdb
 ```
 $ make rmdb
 ```
+
+# How to run on a local setup?
+
+```
+$ make dev
+```
+
+# How to run with docker?
+
+Prepare a `.env` file:
+```
+DATABASE_USER=
+DATABASE_PASSWORD=
+DATABASE_HOST=
+DATABASE_NAME=
+DATABASE_PORT=
+OPEN_AI_API_KEY=
+OPEN_AI_PROJECT_ID=
+```
+
+```
+$ docker run -p8000:8000 --env-file .env_example ghcr.io/korzepadawid/lowcode-ai:latest
+```

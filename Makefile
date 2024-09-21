@@ -4,5 +4,8 @@ initdb:
 rmdb:
 	docker rm --force lowcode_db
 
-dev:
-	uvicorn main:app --reload --log-level debug
+vectordb:
+	docker run --name lowcode_qdrant -p 6333:6333 -p 6334:6334 -v ./qdrant_storage:/qdrant/storage:z qdrant/qdrant
+
+rmvecdb:
+    docker rm --force lowcode_qdrant

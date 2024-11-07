@@ -82,7 +82,7 @@ class OpenAILangChain(LLMBase):
         )
         return chain(input_query)
 
-    def add_context(self, user: Optional[str], ai: Optional[str]) -> None:
+    def add_history(self, user: Optional[str], ai: Optional[str]) -> None:
         if user:
             self.memory.chat_memory.add_user_message(user)
         if ai:
@@ -97,7 +97,7 @@ def gradio_fn(_llm_chain: OpenAILangChain):
 
         chat_history.append((input_text, result['final_response']))
 
-        _llm_chain.add_context(result['english_input'], result['assistant_help'])
+        _llm_chain.add_history(result['english_input'], result['assistant_help'])
 
         return chat_history
 

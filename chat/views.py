@@ -68,7 +68,7 @@ class MessageCreateAPIView(views.APIView):
 
         llm = OpenAILangChain()
         for message in messages:
-            llm.add_context(user=message.input, ai=message.answer)
+            llm.add_history(user=message.input, ai=message.answer)
 
         response = llm.predict(input_query)
         logger.info(f'Response: {json.dumps(response, indent=4, ensure_ascii=False)}')

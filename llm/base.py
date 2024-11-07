@@ -8,6 +8,6 @@ class LLMBase(ABC):
         pass
 
     @abstractmethod
-    def add_context(self, user: str, ai: str) -> None:
+    def add_history(self, user: str, ai: str) -> None:
         """This method should be implemented by subclasses."""
         pass

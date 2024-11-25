@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from chat.models import Thread, Message
+from chat.models import MessageV2, Thread, Message
+from graph import QUESTION_TYPES
 
 
 class ThreadShortSerializer(serializers.ModelSerializer):
@@ -30,4 +31,18 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
+        fields = ('id', 'answer', 'created_at')
+
+class ChatInputV2Serializer(serializers.Serializer):
+    input = serializers.CharField(help_text='The input message content provided by the user.')
+    context = serializers.JSONField(help_text='Context of the input message.')
+    question_type = serializers.ChoiceField(help_text='Type of the question.', choices=QUESTION_TYPES)
+
+class MessageSerializerV2(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    answer = serializers.CharField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = MessageV2
         fields = ('id', 'answer', 'created_at')

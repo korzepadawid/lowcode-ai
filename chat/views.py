@@ -10,8 +10,15 @@ from rest_framework import views, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from chat.models import Thread, Message
-from chat.serializers import ThreadShortSerializer, ChatInputSerializer, MessageSerializer
+from chat.models import MessageV2, Thread, Message
+from chat.serializers import (
+    ChatInputV2Serializer,
+    MessageSerializerV2,
+    ThreadShortSerializer,
+    ChatInputSerializer,
+    MessageSerializer,
+)
+from graph import LangGraphLLM
 from langchainopenai import OpenAILangChain
 
 logger = logging.getLogger("chat")
@@ -23,34 +30,35 @@ class ThreadCreateAPIView(views.APIView):
     @swagger_auto_schema(
         responses={
             status.HTTP_201_CREATED: openapi.Response(
-                description='Thread created successfully',
-                schema=ThreadShortSerializer()
+                description="Thread created successfully",
+                schema=ThreadShortSerializer(),
             ),
         }
     )
     def post(self, _: Request) -> Response:
         generated_uuid = uuid.uuid4()
-        serializer = self.serializer_class(data={
-            'uuid': generated_uuid,
-        })
+        serializer = self.serializer_class(
+            data={
+                "uuid": generated_uuid,
+            }
+        )
         if serializer.is_valid():
             thread = Thread.objects.create(uuid=generated_uuid)
             response_serializer = self.serializer_class(thread)
-            logger.info(f'Thread created: {generated_uuid}')
+            logger.info(f"Thread created: {generated_uuid}")
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def get_sorted_messages(thread: Thread) -> List[Message]:
-    messages = Message.objects.filter(thread=thread).order_by('created_at')
+    messages = Message.objects.filter(thread=thread).order_by("created_at")
     return list(messages)
 
 
 def get_input_str(request: Request) -> str:
     serializer = ChatInputSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    return serializer.validated_data.get('input')
-
+    return serializer.validated_data.get("input")
 
 class MessageCreateAPIView(views.APIView):
 
@@ -84,5 +92,39 @@ class MessageCreateAPIView(views.APIView):
 
     def get_thread_from_req(self) -> Thread:
         thread_uuid = self.kwargs.get('uuid')
+        thread = get_object_or_404(Thread, uuid=thread_uuid)
+        return thread
+
+
+class MessageCreateV2APIView(views.APIView):
+
+    @swagger_auto_schema(
+        request_body=ChatInputV2Serializer,
+        responses={status.HTTP_201_CREATED: MessageSerializer()},
+    )
+    def post(self, request: Request, **kwargs) -> Response:
+        logger.info(
+            f"Processing new message for thread (uuid): {self.kwargs.get('uuid')}"
+        )
+        thread = self.get_thread_from_req()
+
+        serializer = ChatInputV2Serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        input_query = serializer.validated_data.get("input")
+
+        logger.info(f"Input query: {input_query}, thread: {thread.uuid}")
+
+        llm = LangGraphLLM()
+        response = llm.predict(input_query=input_query, question_type=serializer.validated_data.get("question_type"))
+        logger.info(f"Response: {json.dumps(response, indent=4, ensure_ascii=False)}")
+        messagev2 = MessageV2.objects.create(
+            thread=thread,
+            input=response["question"],
+            answer=response["response"],
+        )
+        return Response(MessageSerializerV2(instance=messagev2).data, status=status.HTTP_201_CREATED)
+
+    def get_thread_from_req(self) -> Thread:
+        thread_uuid = self.kwargs.get("uuid")
         thread = get_object_or_404(Thread, uuid=thread_uuid)
         return thread

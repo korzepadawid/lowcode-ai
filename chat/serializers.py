@@ -27,7 +27,7 @@ class ChatInputSerializer(serializers.Serializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
-    answer = serializers.CharField(source='answer_in_lang', read_only=True)
+    answer = serializers.CharField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:

@@ -11,9 +11,6 @@ class Thread(models.Model):
 
 
 class Message(models.Model):
-    original_input = models.TextField(blank=True)
-    lang = models.CharField(max_length=255)
-    answer_in_lang = models.TextField(blank=True)
     input = models.TextField()
     answer = models.TextField()
     thread = models.ForeignKey(Thread, related_name='messages', on_delete=models.CASCADE)

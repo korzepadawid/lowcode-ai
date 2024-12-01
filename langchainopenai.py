@@ -31,56 +31,26 @@ class OpenAILangChain(LLMBase):
         self.translate_prompt = None
 
         self.llm_model = "gpt-3.5-turbo"
-        self.memory = ConversationBufferMemory(memory_key="chat_history", input_key="english_input")
+        self.memory = ConversationBufferMemory(memory_key="chat_history", input_key="input")
         self.llm = ChatOpenAI(temperature=0.2, model=self.llm_model)
         self.init_prompts()
 
     def init_prompts(self) -> None:
-        self.translate_prompt = ChatPromptTemplate.from_template(
-            "Translate the following input to english, don't translate programming code, leave it as it is"
-            "\n\n{input}"
-        )
-        self.translation_chain = LLMChain(
-            llm=self.llm, prompt=self.translate_prompt, output_key="english_input",
-        )
-
-        self.detect_language_prompt = ChatPromptTemplate.from_template(
-            "What language is the following input, respond only in ISO 639 code:\n\n{input}"
-        )
-        self.detect_language_chain = LLMChain(
-            llm=self.llm, prompt=self.detect_language_prompt, output_key="language"
-        )
 
         self.code_assistant_prompt = ChatPromptTemplate.from_template(
             "You are an assistant for a lowcode platform, you're going to help with JavaScript and C#, be concise:"
-            "\n\n{english_input}\n\nChat history:\n{chat_history}"
+            "\n\n{input}\n\nChat history:\n{chat_history}"
         )
         self.code_assistant_chain = LLMChain(
             llm=self.llm, prompt=self.code_assistant_prompt, output_key="assistant_help", memory=self.memory,
         )
 
-        self.translate_back_prompt = ChatPromptTemplate.from_template(
-            "Translate the following text to {language}, don't mention it in the response:\n\n\n{assistant_help}",
-        )
-        self.translate_back_chain = LLMChain(
-            llm=self.llm, prompt=self.translate_back_prompt, output_key="final_response"
-        )
 
     def predict(self, input_query: str) -> dict:
         logger.info(f"Predicting, {input_query}")
         logger.info(f"Chat history: {self.memory.load_memory_variables({})}")
-        chain = SequentialChain(
-            chains=[
-                self.translation_chain,
-                self.detect_language_chain,
-                self.code_assistant_chain,
-                self.translate_back_chain,
-            ],
-            input_variables=["input"],
-            output_variables=["english_input", "language", "assistant_help", "final_response"],
-            verbose=False,
-        )
-        return chain(input_query)
+
+        return self.code_assistant_chain(input_query)
 
     def add_history(self, user: Optional[str], ai: Optional[str]) -> None:
         if user:
@@ -94,10 +64,8 @@ def gradio_fn(_llm_chain: OpenAILangChain):
 
     def gradio_predict(input_text):
         result = _llm_chain.predict(input_text)
-
-        chat_history.append((input_text, result['final_response']))
-
-        _llm_chain.add_history(result['english_input'], result['assistant_help'])
+        chat_history.append((input_text, result['assistant_help']))
+        _llm_chain.add_history(result['input'], result['assistant_help'])
 
         return chat_history
 

@@ -16,7 +16,7 @@ from chat.serializers import (
     MessageSerializerV2,
     ThreadShortSerializer,
     ChatInputSerializer,
-    MessageSerializer,
+    MessageSerializer
 )
 from graph import LangGraphLLM
 from langchainopenai import OpenAILangChain
@@ -71,8 +71,14 @@ class MessageCreateAPIView(views.APIView):
         thread = self.get_thread_from_req()
         messages = get_sorted_messages(thread)
 
-        input_query = get_input_str(request)
+        serializer = ChatInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        input_query = serializer.validated_data.get("input")
+        context = serializer.validated_data.get("context")
+
         logger.info(f'Input query: {input_query}, thread: {thread.uuid}')
+        logger.info(f'Context: {context}')
 
         llm = OpenAILangChain()
         for message in messages:
@@ -82,11 +88,8 @@ class MessageCreateAPIView(views.APIView):
         logger.info(f'Response: {json.dumps(response, indent=4, ensure_ascii=False)}')
         message = Message.objects.create(
             thread=thread,
-            input=response['english_input'],
+            input=response['input'],
             answer=response['assistant_help'],
-            answer_in_lang=response['final_response'],
-            original_input=input_query,
-            lang=response['language'],
         )
         return Response(MessageSerializer(instance=message).data, status=status.HTTP_201_CREATED)
 

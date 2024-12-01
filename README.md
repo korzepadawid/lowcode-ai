@@ -10,7 +10,11 @@ $ pip install -r requirements.txt
 ```
 
 ```
-$ uvicorn main:app --reload --log-level debug
+$ python manage.py migrate
+```
+
+```
+$ python manage.py runserver 0.0.0.0:8000 
 ```
 
 ## How to run a database locally?

@@ -3,12 +3,13 @@ from typing import Optional, TypedDict
 from langgraph.graph import StateGraph, START, END
 from llm.base import LLMBase
 from llm.codestral import CodestralLLM
+from llm.openai2 import OpenAILangChainV2
 
 VALIDATION_TYPE = "VALIDATION"
 RULE_TYPE = "RULE"
-DOCS_TYPE = "DOCS"
+GENERAL = "GENERAL"
 
-QUESTION_TYPES = [VALIDATION_TYPE, RULE_TYPE, DOCS_TYPE]
+QUESTION_TYPES = [VALIDATION_TYPE, RULE_TYPE, GENERAL]
 
 logger = logging.getLogger("graph_llm")
 
@@ -53,21 +54,71 @@ def generate_validation(state: GraphState) -> GraphState:
 
 
 def generate_rule(state: GraphState) -> GraphState:
-    return {"response": "Your rule code here"}
+    template = """
+    You're an AI assistant on the Ferryt Low-Code Platform.
+
+    # Universal Prompt for C# Code Generation for Client Data and Screens Management
+
+    When writing C# code, use the available process fields and screens to manage client data and user interface. Follow these guidelines:
+
+    ## 1. Available Process Fields:
+    - `PF.DKL_DaneKlienta_S.RodzajKonta`
+    - `PF.DKL_DaneKlienta_S.NumerKonta`
+    - `PF.DKL_DaneKlienta_S.RodzajKarty`
+    - `PF.DKL_DaneKlienta_S.Wiek`
+    - `PF.DKL_DaneKlienta_S.ImieINazwisko`
+    - `PF.DKL_DaneKlienta_S.Login`
+    - `PF.DKL_DaneKlienta_S.Email`
+    - `PF.DKL_DaneKlienta_S.ID`
+
+    ### Properties:
+    Fields have the following properties:
+    - `HasValue`, `IsEditable`, `IsRequired`, `IsVisible`, `Value`.
+
+    ### Actions:
+    You can perform these operations on the fields:
+    - `SetEditable(bool)`, `SetVisible(bool)`, `SetRequired(bool)`, `SetNull()`, `GetValueOrDefault(defaultValue)`.
+
+    ## 2. Available Screens:
+    - `Ekran1`, `Ekran2`, `Tech_BottomScreen`, `Tech_ErrorMessage`.
+
+    ### Methods:
+    Screens can be controlled using the following methods:
+    - `Hide()`, `HideAll()`, `Show()`, `ShowAll()`.
+
+    ## 3. Accessing User Data:
+    - `USER.Current` provides access to properties like `IsAuthenticated`, `UserLogin`, `UserFullName`, `UserEmail`, `UserID`, etc.
+
+    ### Properties:
+    User properties have:
+    - `HasValue`, `Value`.
+
+    ## 4. Example Functionalities:
+    - Setting field values based on conditions.
+    - Controlling field visibility, editability, and requirements.
+    - Assigning user data to client data under specific conditions.
+    - Displaying or hiding screens.
+
+    Always remember: respond with code only, unless instructed otherwise.
+    """
+    llm = OpenAILangChainV2(template)
+    answer = llm.predict(state["question"])
+    logger.info(answer)
+    return {"response": answer}
 
 
 def determine_question_type(state: GraphState) -> GraphState:
     return {"question_type": state["question_type"]}
 
-def docs(state: GraphState) -> GraphState:
-    return {"response": "Your docs here"}
+def general(state: GraphState) -> GraphState:
+    return {"response": "General prompt here"}
 
 class LangGraphLLM(LLMBase):
     def __init__(self) -> None:
         self.graph = StateGraph(GraphState)
         self.graph.add_node("generate_rule", generate_rule)
         self.graph.add_node("generate_validation", generate_validation)
-        self.graph.add_node("docs", docs)
+        self.graph.add_node("general", general)
         self.graph.add_node("determine_question_type", determine_question_type)
 
         self.graph.add_conditional_edges(
@@ -76,14 +127,14 @@ class LangGraphLLM(LLMBase):
             {
                 "VALIDATION": "generate_validation",
                 "RULE": "generate_rule",
-                "DOCS": "docs",
+                "GENERAL": "general",
             },
         )
 
         self.graph.add_edge(START, "determine_question_type")
         self.graph.add_edge("generate_validation", END)
         self.graph.add_edge("generate_rule", END)
-        self.graph.add_edge("docs", END)
+        self.graph.add_edge("general", END)
         self.graph = self.graph.compile()
 
     def add_history(self, user: str, ai: str) -> None:
@@ -99,7 +150,7 @@ class LangGraphLLM(LLMBase):
 
 def main():
     llm = LangGraphLLM()
-    print(llm.predict("Write a pesel validator", "DOCS"))
+    print(llm.predict("Write a pesel validator", "GENERAL"))
 
 
 if __name__ == "__main__":

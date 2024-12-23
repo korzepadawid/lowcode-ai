@@ -2,6 +2,7 @@ import logging
 from typing import Optional, TypedDict
 from langgraph.graph import StateGraph, START, END
 from llm.base import LLMBase
+from llm.bielik import BielikLLM
 from llm.codestral import CodestralLLM
 from llm.openai2 import OpenAILangChainV2
 
@@ -13,13 +14,15 @@ QUESTION_TYPES = [VALIDATION_TYPE, RULE_TYPE, GENERAL]
 
 logger = logging.getLogger("graph_llm")
 
+
 class GraphState(TypedDict):
     question: Optional[str]
     question_type: Optional[str]
     response: Optional[str]
+    in_english: Optional[str]
 
 
-def generate_validation(state: GraphState) -> GraphState:
+def generate_validation(state: GraphState) -> dict:
     template = """
     You're an AI assistant on the Ferryt Low-Code Platform.
 
@@ -53,7 +56,7 @@ def generate_validation(state: GraphState) -> GraphState:
     return {"response": answer}
 
 
-def generate_rule(state: GraphState) -> GraphState:
+def generate_rule(state: GraphState) -> dict:
     template = """
     You're an AI assistant on the Ferryt Low-Code Platform.
 
@@ -107,11 +110,46 @@ def generate_rule(state: GraphState) -> GraphState:
     return {"response": answer}
 
 
-def determine_question_type(state: GraphState) -> GraphState:
+def translate_pl_to_en(state: GraphState) -> dict:
+    template = """
+    Jesteś tłumaczem języka polskiego na angielski. 
+    Przetłumacz poniższy tekst z polskiego na angielski. 
+    Zwróć wyłącznie przetłumaczony tekst, bez żadnych dodatkowych informacji, komentarzy czy pytań: {input}
+    """
+    llm = BielikLLM(template)
+    answer = llm.predict(state["question"])
+    print("Translated: " + answer)
+    return {"in_english": state["question"]}
+
+
+def determine_question_type(state: GraphState) -> dict:
+    template = """
+    Jesteś systemem odpowiedzialnym za wykrywanie typu pytania. Działasz na platformie low-code Ferryt, która umożliwia tworzenie aplikacji webowych w oparciu o diagramy BPMN.
+
+    ### Zasady działania:
+    - Jeśli pytanie lub prośba zawiera:  
+    - Odwołania do funkcji programistycznych (np. `SetEditable(bool)`, `SetVisible(bool)`, `GetValueOrDefault(defaultValue)` itp.).  
+    - Odniesienia do pól, zmiennych, reguł biznesowych lub logiki walidacji (np. `PF.DKL_DaneKlienta_S.RodzajKonta`).  
+    - Polecenia dotyczące generowania, poprawiania lub analizowania kodu.  
+    W takich przypadkach zwróć odpowiedź: **CODE**.  
+
+    - Jeśli pytanie dotyczy dokumentacji lub ma charakter ogólny, zwróć odpowiedź: **GENERAL**.  
+
+    Zwracaj wyłącznie odpowiedź: **CODE** lub **GENERAL**, bez dodatkowych informacji ani komentarzy.
+
+    Tekst pytania: {input}
+    """
+    llm = BielikLLM(template)
+    answer = llm.predict(state["question"])
+    print("Answer (type): " + answer)
+    if answer == GENERAL:
+        return {"question_type": GENERAL}
     return {"question_type": state["question_type"]}
 
-def general(state: GraphState) -> GraphState:
+
+def general(state: GraphState) -> dict:
     return {"response": "General prompt here"}
+
 
 class LangGraphLLM(LLMBase):
     def __init__(self) -> None:
@@ -119,6 +157,7 @@ class LangGraphLLM(LLMBase):
         self.graph.add_node("generate_rule", generate_rule)
         self.graph.add_node("generate_validation", generate_validation)
         self.graph.add_node("general", general)
+        self.graph.add_node("translate_pl_to_en", translate_pl_to_en)
         self.graph.add_node("determine_question_type", determine_question_type)
 
         self.graph.add_conditional_edges(
@@ -131,7 +170,8 @@ class LangGraphLLM(LLMBase):
             },
         )
 
-        self.graph.add_edge(START, "determine_question_type")
+        self.graph.add_edge(START, "translate_pl_to_en")
+        self.graph.add_edge("translate_pl_to_en", "determine_question_type")
         self.graph.add_edge("generate_validation", END)
         self.graph.add_edge("generate_rule", END)
         self.graph.add_edge("general", END)

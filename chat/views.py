@@ -18,7 +18,7 @@ from chat.serializers import (
     ChatInputSerializer,
     MessageSerializer
 )
-from graph import LangGraphLLM
+from llm.graph import LangGraphLLM
 from langchainopenai import OpenAILangChain
 
 logger = logging.getLogger("chat")

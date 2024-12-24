@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from chat.models import MessageV2, Thread, Message
-from graph import QUESTION_TYPES
+from llm.graph import QUESTION_TYPES
 
 
 class ThreadShortSerializer(serializers.ModelSerializer):

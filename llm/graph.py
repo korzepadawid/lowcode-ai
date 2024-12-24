@@ -3,8 +3,8 @@ from typing import Optional, TypedDict
 from langgraph.graph import StateGraph, START, END
 from llm.base import LLMBase
 from llm.bielik import BielikLLM
-from llm.codestral import CodestralLLM
 from llm.openai2 import OpenAILangChainV2
+from llm.utils import extract_code_blocks, replace_code_blocks
 
 VALIDATION_TYPE = "VALIDATION"
 RULE_TYPE = "RULE"
@@ -50,9 +50,10 @@ def generate_validation(state: GraphState) -> dict:
     Always remember: respond with code only, unless instructed otherwise.
 
     """
-    llm = CodestralLLM(template)
-    answer = llm.predict(state["question"])
-    logger.info(answer)
+    llm = OpenAILangChainV2(template)
+    print("Input: " + state["in_english"])
+    answer = llm.predict(state["in_english"])
+    print("Code generated: " + answer)
     return {"response": answer}
 
 
@@ -106,7 +107,7 @@ def generate_rule(state: GraphState) -> dict:
     """
     llm = OpenAILangChainV2(template)
     answer = llm.predict(state["question"])
-    logger.info(answer)
+    print("Code generated: " + answer)
     return {"response": answer}
 
 
@@ -119,7 +120,27 @@ def translate_pl_to_en(state: GraphState) -> dict:
     llm = BielikLLM(template)
     answer = llm.predict(state["question"])
     print("Translated: " + answer)
-    return {"in_english": state["question"]}
+    return {"in_english": answer}
+
+
+def translate_en_to_pl(state: GraphState) -> dict:
+    if state["response"].startswith("```") and state["response"].endswith("```"):
+        return {"response": state["response"]}
+
+    template = """
+    Translate the given text into Polish, returning only the translated text.  
+    - Do not include any introductions, explanations, or phrases such as "Here is the translated text."  
+    - Leave `<CODE_BLOCK>` exactly as it appears in the input, without any modifications, translations, or replacements.  
+    - Return only the translated text, without adding code or any other content.
+
+    Text for translation: {input}
+    """
+    llm = BielikLLM(template)
+    code_blocks, text_no_code = extract_code_blocks(state["response"])
+    answer = llm.predict(text_no_code)
+    answer = replace_code_blocks(code_blocks, answer)
+    print("Translated (back): " + answer)
+    return {"response": answer}
 
 
 def determine_question_type(state: GraphState) -> dict:
@@ -158,6 +179,7 @@ class LangGraphLLM(LLMBase):
         self.graph.add_node("generate_validation", generate_validation)
         self.graph.add_node("general", general)
         self.graph.add_node("translate_pl_to_en", translate_pl_to_en)
+        self.graph.add_node("translate_eng_to_pl", translate_en_to_pl)
         self.graph.add_node("determine_question_type", determine_question_type)
 
         self.graph.add_conditional_edges(
@@ -172,8 +194,9 @@ class LangGraphLLM(LLMBase):
 
         self.graph.add_edge(START, "translate_pl_to_en")
         self.graph.add_edge("translate_pl_to_en", "determine_question_type")
-        self.graph.add_edge("generate_validation", END)
-        self.graph.add_edge("generate_rule", END)
+        self.graph.add_edge("generate_validation", "translate_eng_to_pl")
+        self.graph.add_edge("generate_rule", "translate_eng_to_pl")
+        self.graph.add_edge("translate_eng_to_pl", END)
         self.graph.add_edge("general", END)
         self.graph = self.graph.compile()
 
@@ -186,12 +209,3 @@ class LangGraphLLM(LLMBase):
             "question_type": question_type,
         }
         return self.graph.invoke(inputs)
-
-
-def main():
-    llm = LangGraphLLM()
-    print(llm.predict("Write a pesel validator", "GENERAL"))
-
-
-if __name__ == "__main__":
-    main()

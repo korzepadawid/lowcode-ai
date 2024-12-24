@@ -12,7 +12,7 @@ GENERAL = "GENERAL"
 
 QUESTION_TYPES = [VALIDATION_TYPE, RULE_TYPE, GENERAL]
 
-logger = logging.getLogger("graph_llm")
+logger = logging.getLogger("graph")
 
 
 class GraphState(TypedDict):
@@ -51,9 +51,9 @@ def generate_validation(state: GraphState) -> dict:
 
     """
     llm = OpenAILangChainV2(template)
-    print("Input: " + state["in_english"])
+    logger.info("Input (validation): %s", state["in_english"])
     answer = llm.predict(state["in_english"])
-    print("Code generated: " + answer)
+    logger.info("Code generated (validation): %s", answer)
     return {"response": answer}
 
 
@@ -107,7 +107,7 @@ def generate_rule(state: GraphState) -> dict:
     """
     llm = OpenAILangChainV2(template)
     answer = llm.predict(state["question"])
-    print("Code generated: " + answer)
+    logger.info("Code generated: %s", answer)
     return {"response": answer}
 
 
@@ -119,7 +119,7 @@ def translate_pl_to_en(state: GraphState) -> dict:
     """
     llm = BielikLLM(template)
     answer = llm.predict(state["question"])
-    print("Translated: " + answer)
+    logger.info("Translated to English: %s", answer)
     return {"in_english": answer}
 
 
@@ -128,10 +128,11 @@ def translate_en_to_pl(state: GraphState) -> dict:
         return {"response": state["response"]}
 
     template = """
-    Translate the given text into Polish, returning only the translated text.  
-    - Do not include any introductions, explanations, or phrases such as "Here is the translated text."  
-    - Leave `<CODE_BLOCK>` exactly as it appears in the input, without any modifications, translations, or replacements.  
-    - Return only the translated text, without adding code or any other content.
+    Translate the following text into Polish, but strictly follow these rules:  
+    1. Do not include any introductions, explanations, or comments, such as "Here is the translated text."  
+    2. Leave `<CODE_BLOCK>` exactly as it appears in the input. Do not translate, modify, replace, or interpret it in any way.  
+    3. **Under no circumstances should you generate, write, or modify code in the response.**  
+    4. Return only the translated text in Polish, preserving `<CODE_BLOCK>` unaltered.  
 
     Text for translation: {input}
     """
@@ -139,7 +140,7 @@ def translate_en_to_pl(state: GraphState) -> dict:
     code_blocks, text_no_code = extract_code_blocks(state["response"])
     answer = llm.predict(text_no_code)
     answer = replace_code_blocks(code_blocks, answer)
-    print("Translated (back): " + answer)
+    logger.info("Translated (back): %s", answer)
     return {"response": answer}
 
 
@@ -162,7 +163,7 @@ def determine_question_type(state: GraphState) -> dict:
     """
     llm = BielikLLM(template)
     answer = llm.predict(state["question"])
-    print("Answer (type): " + answer)
+    logger.info("Detected question type: %s", answer)
     if answer == GENERAL:
         return {"question_type": GENERAL}
     return {"question_type": state["question_type"]}

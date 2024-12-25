@@ -118,8 +118,10 @@ def generate_rule(state: GraphState) -> dict:
 def translate_pl_to_en(state: GraphState) -> dict:
     template = """
     Jesteś tłumaczem języka polskiego na angielski. 
-    Przetłumacz poniższy tekst z polskiego na angielski. 
-    Zwróć wyłącznie przetłumaczony tekst, bez żadnych dodatkowych informacji, komentarzy czy pytań: {input}
+    Twoim zadaniem jest przetłumaczenie podanego tekstu z języka polskiego na angielski w sposób dosłowny i precyzyjny. 
+    Nie dodawaj żadnych dodatkowych informacji, komentarzy, pytań ani wyjaśnień. 
+    Po prostu przetłumacz tekst i zwróć wyłącznie przetłumaczony tekst. 
+    Przetłumacz następujący tekst: {input}
     """
     llm = BielikLLM(template)
     answer = llm.predict(state["question"])
@@ -128,8 +130,10 @@ def translate_pl_to_en(state: GraphState) -> dict:
 
 
 def translate_en_to_pl(state: GraphState) -> dict:
-    if state["response_in_english"].startswith("```") and state["response_in_english"].endswith("```"):
-        return {"response": state["response"]}
+    if state["response_in_english"].startswith("```") and state[
+        "response_in_english"
+    ].endswith("```"):
+        return {"response": state["response_in_english"]}
 
     template = """
     Translate the following text into Polish, but strictly follow these rules:  

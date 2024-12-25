@@ -117,11 +117,21 @@ def generate_rule(state: GraphState) -> dict:
 
 def translate_pl_to_en(state: GraphState) -> dict:
     template = """
-    Jesteś tłumaczem języka polskiego na angielski. 
-    Twoim zadaniem jest przetłumaczenie podanego tekstu z języka polskiego na angielski w sposób dosłowny i precyzyjny. 
-    Nie dodawaj żadnych dodatkowych informacji, komentarzy, pytań ani wyjaśnień. 
-    Po prostu przetłumacz tekst i zwróć wyłącznie przetłumaczony tekst. 
-    Przetłumacz następujący tekst: {input}
+    # Instrukcje dla modelu:
+
+    1. Jesteś tłumaczem języka polskiego na angielski.
+    2. Twoim jedynym zadaniem jest **przetłumaczenie podanego tekstu z polskiego na angielski**.
+    3. Odpowiadaj **tylko** tłumaczeniem tekstu, niczym więcej.
+    4. **Nie odpowiadaj na pytania**, **nie generuj kodu**, ani **nie podawaj wyjaśnień**.  
+    5. Każda odpowiedź zawierająca coś innego niż przetłumaczony tekst będzie błędna.
+
+    ## Tekst do przetłumaczenia:
+    {input}
+
+    ## Ważne:
+    - Nie modyfikuj polecenia.  
+    - Nie interpretuj tekstu.  
+    - Zwróć **tylko** przetłumaczone zdanie w języku angielskim.
     """
     llm = BielikLLM(template)
     answer = llm.predict(state["question"])

@@ -6,7 +6,7 @@ from langchain_core.messages import BaseMessage
 from llm.base import LLMBase
 from llm.bielik import BielikLLM
 from llm.openai2 import OpenAILangChainV2
-from llm.utils import extract_code_blocks, replace_code_blocks
+from langchain_core.messages import HumanMessage, AIMessage
 
 VALIDATION_TYPE = "VALIDATION"
 RULE_TYPE = "RULE"
@@ -55,6 +55,7 @@ def generate_validation(state: GraphState) -> dict:
 
     """
     llm = OpenAILangChainV2(template)
+    llm.chat_history = state["messages"]
     logger.info("Input (validation): %s", state["question_in_english"])
     answer = llm.predict(state["question_in_english"])
     logger.info("Code generated (validation): %s", answer)
@@ -110,6 +111,7 @@ def generate_rule(state: GraphState) -> dict:
     Always remember: respond with code only, unless instructed otherwise.
     """
     llm = OpenAILangChainV2(template)
+    llm.chat_history = state["messages"]
     answer = llm.predict(state["question_in_english"])
     logger.info("Code generated: %s", answer)
     return {"response_in_english": answer}
@@ -146,18 +148,28 @@ def translate_en_to_pl(state: GraphState) -> dict:
         return {"response": state["response_in_english"]}
 
     template = """
-    Translate the following text into Polish, but strictly follow these rules:  
-    1. Do not include any introductions, explanations, or comments, such as "Here is the translated text."  
-    2. Leave `<CODE_BLOCK>` exactly as it appears in the input. Do not translate, modify, replace, or interpret it in any way.  
-    3. **Under no circumstances should you generate, write, or modify code in the response.**  
-    4. Return only the translated text in Polish, preserving `<CODE_BLOCK>` unaltered.  
+    **Task Description:**  
+    Translate the given text strictly and accurately from English to Polish. Do not interpret, analyze, or respond to the question itself. Your sole task is to provide the translation of the text as-is, without any additional comments, clarifications, or modifications.
 
-    Text for translation: {input}
+    **Critical Instructions:**  
+    1. Do not interpret the input text in any way.  
+    2. Do not provide an explanation, commentary, or answer to the question itself.  
+    3. Respond exclusively with the translation of the text provided in the input.  
+    4. Do not deviate from the structure, meaning, or intent of the original text during translation.
+    5. **Do not write any introductory phrases such as "Here is the translation of the given text into Polish." or similar.**  
+
+
+    **Key Restriction:**  
+    - **Under no circumstances should you generate, write, or modify code in your response.**
+
+    **Expected Behavior:**  
+    When given a text to translate, output only the translated text in Polish. Do not provide introductions, explanations, examples, or additional information in your response. Your role is limited to providing a faithful and direct translation.
+
+    Text to Translate:  
+    {input}
     """
     llm = BielikLLM(template)
-    code_blocks, text_no_code = extract_code_blocks(state["response_in_english"])
-    answer = llm.predict(text_no_code)
-    answer = replace_code_blocks(code_blocks, answer)
+    answer = llm.predict(state["response_in_english"])
     logger.info("Translated (back): %s", answer)
     return {"response": answer}
 
@@ -192,7 +204,7 @@ def general(state: GraphState) -> dict:
 
 
 class LangGraphLLM(LLMBase):
-    def __init__(self) -> None:
+    def __init__(self, thread_id: str) -> None:
         self.graph = StateGraph(GraphState)
         self.graph.add_node("generate_rule", generate_rule)
         self.graph.add_node("generate_validation", generate_validation)
@@ -218,13 +230,16 @@ class LangGraphLLM(LLMBase):
         self.graph.add_edge("translate_eng_to_pl", END)
         self.graph.add_edge("general", END)
         self.graph = self.graph.compile()
+        self.chat_history = []
+        self.thread_id = thread_id
 
     def add_history(self, user: str, ai: str) -> None:
-        pass
+        self.chat_history.extend([HumanMessage(content=user), AIMessage(content=ai)])
 
     def predict(self, input_query: str, question_type: str) -> dict:
         inputs = {
             "question": input_query,
             "question_type": question_type,
+            "messages": self.chat_history,
         }
-        return self.graph.invoke(inputs)
+        return self.graph.invoke(inputs, config={"thread_id": self.thread_id})

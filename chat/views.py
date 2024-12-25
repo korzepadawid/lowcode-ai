@@ -55,6 +55,11 @@ def get_sorted_messages(thread: Thread) -> List[Message]:
     return list(messages)
 
 
+def get_sorted_messages_v2(thread: Thread) -> List[Message]:
+    messages = MessageV2.objects.filter(thread=thread).order_by("created_at")
+    return list(messages)
+
+
 def get_input_str(request: Request) -> str:
     serializer = ChatInputSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -122,19 +127,25 @@ class MessageCreateV2APIView(views.APIView):
 
         logger.info(f"Input query: {input_query}, thread: {thread.uuid}")
 
-        llm = LangGraphLLM()
+        llm = LangGraphLLM(thread_id=thread.uuid)
+        messages = get_sorted_messages_v2(thread)
+
+        for message in messages:
+            llm.add_history(user=message.input, ai=message.answer)
+
         response = llm.predict(
             input_query=input_query,
             question_type=serializer.validated_data.get("question_type"),
         )
-        logger.info(f"Response: {json.dumps(response, indent=4, ensure_ascii=False)}")
         messagev2 = MessageV2.objects.create(
             thread=thread,
             input=response["question_in_english"],
             answer=response["response_in_english"],
         )
         messagev2.answer = response["response"]
-        return Response(MessageSerializerV2(instance=messagev2).data, status=status.HTTP_201_CREATED)
+        return Response(
+            MessageSerializerV2(instance=messagev2).data, status=status.HTTP_201_CREATED
+        )
 
     def get_thread_from_req(self) -> Thread:
         thread_uuid = self.kwargs.get("uuid")

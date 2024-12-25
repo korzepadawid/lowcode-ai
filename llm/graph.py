@@ -1,6 +1,8 @@
 import logging
-from typing import Optional, TypedDict
+from typing import List, Optional, TypedDict
+
 from langgraph.graph import StateGraph, START, END
+from langchain_core.messages import BaseMessage
 from llm.base import LLMBase
 from llm.bielik import BielikLLM
 from llm.openai2 import OpenAILangChainV2
@@ -19,7 +21,9 @@ class GraphState(TypedDict):
     question: Optional[str]
     question_type: Optional[str]
     response: Optional[str]
-    in_english: Optional[str]
+    question_in_english: Optional[str]
+    response_in_english: Optional[str]
+    messages: List[BaseMessage]
 
 
 def generate_validation(state: GraphState) -> dict:
@@ -51,10 +55,10 @@ def generate_validation(state: GraphState) -> dict:
 
     """
     llm = OpenAILangChainV2(template)
-    logger.info("Input (validation): %s", state["in_english"])
-    answer = llm.predict(state["in_english"])
+    logger.info("Input (validation): %s", state["question_in_english"])
+    answer = llm.predict(state["question_in_english"])
     logger.info("Code generated (validation): %s", answer)
-    return {"response": answer}
+    return {"response_in_english": answer}
 
 
 def generate_rule(state: GraphState) -> dict:
@@ -106,9 +110,9 @@ def generate_rule(state: GraphState) -> dict:
     Always remember: respond with code only, unless instructed otherwise.
     """
     llm = OpenAILangChainV2(template)
-    answer = llm.predict(state["question"])
+    answer = llm.predict(state["question_in_english"])
     logger.info("Code generated: %s", answer)
-    return {"response": answer}
+    return {"response_in_english": answer}
 
 
 def translate_pl_to_en(state: GraphState) -> dict:
@@ -120,11 +124,11 @@ def translate_pl_to_en(state: GraphState) -> dict:
     llm = BielikLLM(template)
     answer = llm.predict(state["question"])
     logger.info("Translated to English: %s", answer)
-    return {"in_english": answer}
+    return {"question_in_english": answer}
 
 
 def translate_en_to_pl(state: GraphState) -> dict:
-    if state["response"].startswith("```") and state["response"].endswith("```"):
+    if state["response_in_english"].startswith("```") and state["response_in_english"].endswith("```"):
         return {"response": state["response"]}
 
     template = """
@@ -137,7 +141,7 @@ def translate_en_to_pl(state: GraphState) -> dict:
     Text for translation: {input}
     """
     llm = BielikLLM(template)
-    code_blocks, text_no_code = extract_code_blocks(state["response"])
+    code_blocks, text_no_code = extract_code_blocks(state["response_in_english"])
     answer = llm.predict(text_no_code)
     answer = replace_code_blocks(code_blocks, answer)
     logger.info("Translated (back): %s", answer)

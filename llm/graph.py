@@ -242,4 +242,4 @@ class LangGraphLLM(LLMBase):
             "question_type": question_type,
             "messages": self.chat_history,
         }
-        return self.graph.invoke(inputs, config={"thread_id": self.thread_id})
+        return self.graph.invoke(inputs)

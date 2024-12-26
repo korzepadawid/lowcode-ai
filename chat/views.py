@@ -139,10 +139,11 @@ class MessageCreateV2APIView(views.APIView):
         )
         messagev2 = MessageV2.objects.create(
             thread=thread,
-            input=response["question_in_english"],
-            answer=response["response_in_english"],
+            input=response["question"],
+            answer=response["response"],
+            input_translated=response["question_in_english"],
+            answer_translated=response["response_in_english"],
         )
-        messagev2.answer = response["response"]
         return Response(
             MessageSerializerV2(instance=messagev2).data, status=status.HTTP_201_CREATED
         )

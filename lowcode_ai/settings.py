@@ -92,6 +92,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        'graph': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     },
 }
 

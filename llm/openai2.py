@@ -3,11 +3,10 @@ import warnings
 
 from dotenv import load_dotenv
 
-from langchain.memory import ConversationBufferMemory
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 
 from llm.base import LLMBase
 
@@ -35,7 +34,7 @@ class OpenAILangChainV2(LLMBase):
         self.chat_history = []
 
     def add_history(self, user: str, ai: str) -> None:
-        self.chat_history.extend([HumanMessage(content=user), ai])
+        self.chat_history.extend([HumanMessage(content=user), AIMessage(content=ai)])
 
     def predict(self, input_query: str) -> dict:
         return self.llm_chain.invoke(

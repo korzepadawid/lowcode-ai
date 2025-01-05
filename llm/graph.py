@@ -71,14 +71,23 @@ def generate_rule(state: GraphState) -> dict:
     When writing C# code, use the available process fields and screens to manage client data and user interface. Follow these guidelines:
 
     ## 1. Available Process Fields:
-    - `PF.DKL_DaneKlienta_S.RodzajKonta`
-    - `PF.DKL_DaneKlienta_S.NumerKonta`
-    - `PF.DKL_DaneKlienta_S.RodzajKarty`
-    - `PF.DKL_DaneKlienta_S.Wiek`
-    - `PF.DKL_DaneKlienta_S.ImieINazwisko`
-    - `PF.DKL_DaneKlienta_S.Login`
-    - `PF.DKL_DaneKlienta_S.Email`
-    - `PF.DKL_DaneKlienta_S.ID`
+    - `PF.ZPU_Przebieg` : Int
+    - `PF.ZPU_Rok_produkcji` : Int
+    - `PF.DaneOsobowe_S.ImieKlienta` : String
+    - `PF.DaneOsowe_S.NazwiskoKlienta` : String
+    
+    - `PF.DKL_DaneKlienta_S.RodzajKonta` : String
+    - `PF.DKL_DaneKlienta_S.NumerKonta` : String
+    - `PF.DKL_DaneKlienta_S.RodzajKarty` : String
+    - `PF.DKL_DaneKlienta_S.Wiek` : Int
+    - `PF.DKL_DaneKlienta_S.ImieINazwisko` : String
+    - `PF.DKL_DaneKlienta_S.Login` : String
+    - `PF.DKL_DaneKlienta_S.Email` : String
+    - `PF.DKL_DaneKlienta_S.ID` : Int
+    
+    - `PF.DKL_DaneKlienta_T` : table
+        * Imie
+        * Nazwisko 
 
     ### Properties:
     Fields have the following properties:
@@ -87,26 +96,54 @@ def generate_rule(state: GraphState) -> dict:
     ### Actions:
     You can perform these operations on the fields:
     - `SetEditable(bool)`, `SetVisible(bool)`, `SetRequired(bool)`, `SetNull()`, `GetValueOrDefault(defaultValue)`.
+    
+    ### Arrays:
+    - Arrays are complex datatypes that store fields or structures. Their name should end with `_T`.
+        A specific element in the array can be accessed via `[index]` or `.Items(index)`.
+    - Operations on arrays: Length, SetMinimumSize(int)
 
     ## 2. Available Screens:
-    - `Ekran1`, `Ekran2`, `Tech_BottomScreen`, `Tech_ErrorMessage`.
+    - `Ekran1` , `Ekran2`, `Tech_BottomScreen`, `Tech_ErrorMessage`.
+    - ekran (alias = name)
 
     ### Methods:
+    Screens can be accessed by `G.`.
     Screens can be controlled using the following methods:
     - `Hide()`, `HideAll()`, `Show()`, `ShowAll()`.
 
     ## 3. Accessing User Data:
-    - `USER.Current` provides access to properties like `IsAuthenticated`, `UserLogin`, `UserFullName`, `UserEmail`, `UserID`, etc.
+    - `USER.Current` provides access to properties like `IsAuthenticated`, `UserLogin`, `UserFullName`, `UserEmail`, 
+        `UserID`, etc.
+        
+    ## 4. ENV Object:
+    - ENV gives access to many environment variables like:
+        * ActionIndices[0] - points to the element on which the action was last performed (in arrays)
+        * ApplicationGuid
+        * UserDevice.IsMobile
+        * UserDevice.BrowserInfo
+        * UserDevice.OperatingSystem etc.
+        
+    ## 5. ACTION object
+    - ACTION object has methods like: `ClearDocumentRequirement()`, `ClearFieldRequirement()`, 
+        `SetFieldsReadOnly()` - disables editable fields, `VisibilityFlagHide(flagName)` - hide all actions with the 
+        flag set, `VisibilityFlagHideAll()`, `VisibilityFlagShow(flagName)` - show all actions with the flag set`, 
+        `VisibilityFlagShowAll()`
+        
+    ## 6. LOOPS?
+    
+    ## 7. Enumerator?
 
-    ### Properties:
-    User properties have:
-    - `HasValue`, `Value`.
-
-    ## 4. Example Functionalities:
+    ## 8. Example Functionalities:
     - Setting field values based on conditions.
-    - Controlling field visibility, editability, and requirements.
+    - Controlling field visibility, editability and requirements.
     - Assigning user data to client data under specific conditions.
     - Displaying or hiding screens.
+    
+    ## 9. Notes:
+    - Reference to the `.Value` property, may cause an error if the field is null. 
+        To avoid this, first check that the value is via `.HasValue`.
+    - If code is very simple, divide it to the 3 separate blocks: `if` , `then`, `else`. `If` statement must not be 
+        empty. If something is to be executed every time, enter `true` there.
 
     Always remember: respond with code only, unless instructed otherwise.
     """

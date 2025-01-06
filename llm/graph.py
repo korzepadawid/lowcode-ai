@@ -71,23 +71,24 @@ def generate_rule(state: GraphState) -> dict:
     When writing C# code, use the available process fields and screens to manage client data and user interface. Follow these guidelines:
 
     ## 1. Available Process Fields:
-    - `PF.ZPU_Przebieg` : Int
-    - `PF.ZPU_Rok_produkcji` : Int
-    - `PF.DaneOsobowe_S.ImieKlienta` : String
-    - `PF.DaneOsowe_S.NazwiskoKlienta` : String
+    - `PF.UR_DaneKlienta_S.Imie` : String
+    - `PF.UR_DaneKlienta_S.Nazwisko` : String
+    - `PF.UR_DaneKlienta_S.Email` : String
+    - `PF.UR_DaneKlienta_S.NrTelefonu` : String
     
-    - `PF.DKL_DaneKlienta_S.RodzajKonta` : String
-    - `PF.DKL_DaneKlienta_S.NumerKonta` : String
-    - `PF.DKL_DaneKlienta_S.RodzajKarty` : String
-    - `PF.DKL_DaneKlienta_S.Wiek` : Int
-    - `PF.DKL_DaneKlienta_S.ImieINazwisko` : String
-    - `PF.DKL_DaneKlienta_S.Login` : String
-    - `PF.DKL_DaneKlienta_S.Email` : String
-    - `PF.DKL_DaneKlienta_S.ID` : Int
-    
-    - `PF.DKL_DaneKlienta_T` : table
+    - `PF.UR_DaneRodziny_T` : table
         * Imie
         * Nazwisko 
+        * Wiek
+        
+    - `PF.UR_KodZnizkowy` : String
+    - `PF.UR_OdrzuceniePrzezWiek` : Bool
+    - `PF.UR_PoziomUbezpieczenia` : String
+    - `PF.UR_RodzajUbezpieczenia` : String
+    - `PF.UR_Skladka` : Decimal
+    - `PF.UR_UbezpieczenieDodatkowe` : Bool
+    - `PF.tech_Message` : String
+    
 
     ### Properties:
     Fields have the following properties:
@@ -103,8 +104,17 @@ def generate_rule(state: GraphState) -> dict:
     - Operations on arrays: Length, SetMinimumSize(int)
 
     ## 2. Available Screens:
-    - `Ekran1` , `Ekran2`, `Tech_BottomScreen`, `Tech_ErrorMessage`.
-    - ekran (alias = name)
+    - `E010_Powitanie` (alias =`Powitanie`)
+    - `E020_DaneRodziny` (alias =`Dane rodziny`)
+    - `E030_WyborUbezpieczenia` (alias =`Wybór ubezpieczenia`)
+    - `E040_Zgody` (alias =`Zgody`)
+    - `E050_Podsumowanie` (alias =`Podsumowanie`)
+    - `E060_Odrzucenie` (alias =`Odrzucenie`)
+    - `E_techMessage` (alias =`E_techMessage`)
+    - `Tech_SessionEndScreen` (alias =`Tech_SessionEndScreen`)
+    - `Tech_TopScreen` (alias =`Tech_TopScreen`)
+    - `Tech_BottomScreen` (alias =`Tech_BottomScreen`)
+    - `Tech_TabsScreen` (alias =`Tech_TabsScreen`)
 
     ### Methods:
     Screens can be accessed by `G.`.

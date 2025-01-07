@@ -9,26 +9,13 @@ class Thread(models.Model):
     def __str__(self):
         return self.uuid
 
-
 class Message(models.Model):
-    input = models.TextField()
-    answer = models.TextField()
-    thread = models.ForeignKey(
-        Thread, related_name="messages", on_delete=models.CASCADE
-    )
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return self.input
-
-
-class MessageV2(models.Model):
     input_translated = models.TextField()
     answer_translated = models.TextField()
     input = models.TextField()
     answer = models.TextField()
     thread = models.ForeignKey(
-        Thread, related_name="messagesv2", on_delete=models.CASCADE
+        Thread, related_name="messages", on_delete=models.CASCADE
     )
     created_at = models.DateTimeField(default=timezone.now)
 

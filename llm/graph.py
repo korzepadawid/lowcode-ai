@@ -24,6 +24,8 @@ class GraphState(TypedDict):
     question_in_english: Optional[str]
     response_in_english: Optional[str]
     messages: List[BaseMessage]
+    base_messages: List[BaseMessage]
+    context: dict
 
 
 def generate_validation(state: GraphState) -> dict:
@@ -164,16 +166,15 @@ def translate_pl_to_en(state: GraphState) -> dict:
     4. **Nie odpowiadaj na pytania**, **nie generuj kodu**, ani **nie podawaj wyjaśnień**.  
     5. Każda odpowiedź zawierająca coś innego niż przetłumaczony tekst będzie błędna.
 
-    ## Tekst do przetłumaczenia:
-    {input}
-
     ## Ważne:
     - Nie modyfikuj polecenia.  
     - Nie interpretuj tekstu.  
     - Zwróć **tylko** przetłumaczone zdanie w języku angielskim.
+
     """
     llm = BielikLLM(template)
-    answer = llm.predict(state["question"])
+    prompt = f"Tekst do przetłumaczenia: {state['question']}"
+    answer = llm.predict(prompt)
     logger.info("Translated to English: %s", answer)
     return {"question_in_english": answer}
 
@@ -202,46 +203,33 @@ def translate_en_to_pl(state: GraphState) -> dict:
     **Expected Behavior:**  
     When given a text to translate, output only the translated text in Polish. Do not provide introductions, explanations, examples, or additional information in your response. Your role is limited to providing a faithful and direct translation.
 
-    Text to Translate:  
-    {input}
     """
     llm = BielikLLM(template)
-    answer = llm.predict(state["response_in_english"])
+    prompt = f"Text to translate: {state['response_in_english']}"
+    answer = llm.predict(prompt)
     logger.info("Translated (back): %s", answer)
     return {"response": answer}
 
 
 def determine_question_type(state: GraphState) -> dict:
-    template = """
-    Jesteś systemem odpowiedzialnym za wykrywanie typu pytania. Działasz na platformie low-code Ferryt, która umożliwia tworzenie aplikacji webowych w oparciu o diagramy BPMN.
-
-    ### Zasady działania:
-    - Jeśli pytanie lub prośba zawiera:  
-    - Odwołania do funkcji programistycznych (np. `SetEditable(bool)`, `SetVisible(bool)`, `GetValueOrDefault(defaultValue)` itp.).  
-    - Odniesienia do pól, zmiennych, reguł biznesowych lub logiki walidacji (np. `PF.DKL_DaneKlienta_S.RodzajKonta`).  
-    - Polecenia dotyczące generowania, poprawiania lub analizowania kodu.  
-    W takich przypadkach zwróć odpowiedź: **CODE**.  
-
-    - Jeśli pytanie dotyczy dokumentacji lub ma charakter ogólny, zwróć odpowiedź: **GENERAL**.  
-
-    Zwracaj wyłącznie odpowiedź: **CODE** lub **GENERAL**, bez dodatkowych informacji ani komentarzy.
-
-    Tekst pytania: {input}
-    """
-    llm = BielikLLM(template)
-    answer = llm.predict(state["question"])
-    logger.info("Detected question type: %s", answer)
-    if answer == GENERAL:
-        return {"question_type": GENERAL}
-    return {"question_type": state["question_type"]}
+    ctx = state["context"]
+    location = ctx["location"]
+    if "bpmnDesigner" in location:
+        return {"question_type": RULE_TYPE}
+    elif "validation" in location:
+        return {"question_type": VALIDATION_TYPE}
+    return {"question_type": GENERAL}
 
 
 def general(state: GraphState) -> dict:
-    return {"response": "General prompt here"}
+    return {
+        "response": "Tu bedzie integracja z dokumentacja 😊",
+        "response_in_english": "There will be integration with documentation 😊",
+    }
 
 
 class LangGraphLLM(LLMBase):
-    def __init__(self, thread_id: str) -> None:
+    def __init__(self, thread_id: str, context: dict) -> None:
         self.graph = StateGraph(GraphState)
         self.graph.add_node("generate_rule", generate_rule)
         self.graph.add_node("generate_validation", generate_validation)
@@ -254,9 +242,9 @@ class LangGraphLLM(LLMBase):
             "determine_question_type",
             lambda state: state["question_type"],
             {
-                "VALIDATION": "generate_validation",
-                "RULE": "generate_rule",
-                "GENERAL": "general",
+                VALIDATION_TYPE: "generate_validation",
+                RULE_TYPE: "generate_rule",
+                GENERAL: "general",
             },
         )
 
@@ -268,15 +256,22 @@ class LangGraphLLM(LLMBase):
         self.graph.add_edge("general", END)
         self.graph = self.graph.compile()
         self.chat_history = []
+        self.base_chat_history = []
         self.thread_id = thread_id
+        self.context = context
 
     def add_history(self, user: str, ai: str) -> None:
         self.chat_history.extend([HumanMessage(content=user), AIMessage(content=ai)])
+
+    def add_base_history(self, user: str, ai: str) -> None:
+        self.base_chat_history.extend([HumanMessage(content=user), AIMessage(content=ai)])
 
     def predict(self, input_query: str, question_type: str) -> dict:
         inputs = {
             "question": input_query,
             "question_type": question_type,
             "messages": self.chat_history,
+            "base_messages": self.base_chat_history,
+            "context": self.context
         }
         return self.graph.invoke(inputs)

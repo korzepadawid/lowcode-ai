@@ -10,10 +10,10 @@ from rest_framework import views, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from chat.models import MessageV2, Thread, Message
+from chat.models import Message, Thread, Message
 from chat.serializers import (
-    ChatInputV2Serializer,
-    MessageSerializerV2,
+    ChatInputSerializer,
+    MessageSerializer,
     ThreadShortSerializer,
     ChatInputSerializer,
     MessageSerializer,
@@ -50,13 +50,8 @@ class ThreadCreateAPIView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_sorted_messages(thread: Thread) -> List[Message]:
-    messages = Message.objects.filter(thread=thread).order_by("created_at")
-    return list(messages)
-
-
 def get_sorted_messages_v2(thread: Thread) -> List[Message]:
-    messages = MessageV2.objects.filter(thread=thread).order_by("created_at")
+    messages = Message.objects.filter(thread=thread).order_by("created_at")
     return list(messages)
 
 
@@ -77,67 +72,27 @@ class MessageCreateAPIView(views.APIView):
             f"Processing new message for thread (uuid): {self.kwargs.get('uuid')}"
         )
         thread = self.get_thread_from_req()
-        messages = get_sorted_messages(thread)
 
         serializer = ChatInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        input_query = serializer.validated_data.get("input")
-        context = serializer.validated_data.get("context")
-
-        logger.info(f"Input query: {input_query}, thread: {thread.uuid}")
-        logger.info(f"Context: {context}")
-
-        llm = OpenAILangChain()
-        for message in messages:
-            llm.add_history(user=message.input, ai=message.answer)
-
-        response = llm.predict(input_query)
-        logger.info(f"Response: {json.dumps(response, indent=4, ensure_ascii=False)}")
-        message = Message.objects.create(
-            thread=thread,
-            input=response["input"],
-            answer=response["assistant_help"],
-        )
-        return Response(
-            MessageSerializer(instance=message).data, status=status.HTTP_201_CREATED
-        )
-
-    def get_thread_from_req(self) -> Thread:
-        thread_uuid = self.kwargs.get("uuid")
-        thread = get_object_or_404(Thread, uuid=thread_uuid)
-        return thread
-
-
-class MessageCreateV2APIView(views.APIView):
-
-    @swagger_auto_schema(
-        request_body=ChatInputV2Serializer,
-        responses={status.HTTP_201_CREATED: MessageSerializer()},
-    )
-    def post(self, request: Request, **kwargs) -> Response:
-        logger.info(
-            f"Processing new message for thread (uuid): {self.kwargs.get('uuid')}"
-        )
-        thread = self.get_thread_from_req()
-
-        serializer = ChatInputV2Serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
         input_query = serializer.validated_data.get("input")
 
         logger.info(f"Input query: {input_query}, thread: {thread.uuid}")
+        logger.info(f"Context: {serializer.validated_data.get('context', {})}")
+        context = serializer.validated_data.get("context", {})
 
-        llm = LangGraphLLM(thread_id=thread.uuid)
+        llm = LangGraphLLM(thread_id=thread.uuid, context=context)
         messages = get_sorted_messages_v2(thread)
 
         for message in messages:
-            llm.add_history(user=message.input, ai=message.answer)
+            llm.add_history(user=message.input_translated, ai=message.answer_translated)
+            llm.add_base_history(user=message.input, ai=message.answer)
 
         response = llm.predict(
             input_query=input_query,
-            question_type=serializer.validated_data.get("question_type"),
+            question_type="VALIDATION",
         )
-        messagev2 = MessageV2.objects.create(
+        message = Message.objects.create(
             thread=thread,
             input=response["question"],
             answer=response["response"],
@@ -145,7 +100,7 @@ class MessageCreateV2APIView(views.APIView):
             answer_translated=response["response_in_english"],
         )
         return Response(
-            MessageSerializerV2(instance=messagev2).data, status=status.HTTP_201_CREATED
+            MessageSerializer(instance=message).data, status=status.HTTP_201_CREATED
         )
 
     def get_thread_from_req(self) -> Thread:

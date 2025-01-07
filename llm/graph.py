@@ -172,7 +172,6 @@ def translate_pl_to_en(state: GraphState) -> dict:
     - Zwróć **tylko** przetłumaczone zdanie w języku angielskim.
 
     """
-    llm = BielikLLM(template)
     prompt = f"Tekst do przetłumaczenia: {state['question']}"
     answer = llm.predict(prompt)
     logger.info("Translated to English: %s", answer)

@@ -8,6 +8,8 @@ from llm.bielik import BielikLLM
 from llm.openai2 import OpenAILangChainV2
 from langchain_core.messages import HumanMessage, AIMessage
 
+from utils.context_parser import parse_context_fields, parse_context_screens
+
 VALIDATION_TYPE = "VALIDATION"
 RULE_TYPE = "RULE"
 GENERAL = "GENERAL"
@@ -73,23 +75,8 @@ def generate_rule(state: GraphState) -> dict:
     When writing C# code, use the available process fields and screens to manage client data and user interface. Follow these guidelines:
 
     ## 1. Available Process Fields:
-    - `PF.UR_DaneKlienta_S.Imie` : String
-    - `PF.UR_DaneKlienta_S.Nazwisko` : String
-    - `PF.UR_DaneKlienta_S.Email` : String
-    - `PF.UR_DaneKlienta_S.NrTelefonu` : String
     
-    - `PF.UR_DaneRodziny_T` : table
-        * Imie
-        * Nazwisko 
-        * Wiek
-        
-    - `PF.UR_KodZnizkowy` : String
-    - `PF.UR_OdrzuceniePrzezWiek` : Bool
-    - `PF.UR_PoziomUbezpieczenia` : String
-    - `PF.UR_RodzajUbezpieczenia` : String
-    - `PF.UR_Skladka` : Decimal
-    - `PF.UR_UbezpieczenieDodatkowe` : Bool
-    - `PF.tech_Message` : String
+    {data_model}
     
 
     ### Properties:
@@ -106,17 +93,8 @@ def generate_rule(state: GraphState) -> dict:
     - Operations on arrays: Length, SetMinimumSize(int)
 
     ## 2. Available Screens:
-    - `E010_Powitanie` (alias =`Powitanie`)
-    - `E020_DaneRodziny` (alias =`Dane rodziny`)
-    - `E030_WyborUbezpieczenia` (alias =`Wybór ubezpieczenia`)
-    - `E040_Zgody` (alias =`Zgody`)
-    - `E050_Podsumowanie` (alias =`Podsumowanie`)
-    - `E060_Odrzucenie` (alias =`Odrzucenie`)
-    - `E_techMessage` (alias =`E_techMessage`)
-    - `Tech_SessionEndScreen` (alias =`Tech_SessionEndScreen`)
-    - `Tech_TopScreen` (alias =`Tech_TopScreen`)
-    - `Tech_BottomScreen` (alias =`Tech_BottomScreen`)
-    - `Tech_TabsScreen` (alias =`Tech_TabsScreen`)
+    
+    {screens}
 
     ### Methods:
     Screens can be accessed by `G.`.
@@ -159,6 +137,10 @@ def generate_rule(state: GraphState) -> dict:
 
     Always remember: respond with code only, unless instructed otherwise.
     """
+    data_model = parse_context_fields(state["context"])
+    screens = parse_context_screens(state["context"])
+    template = template.format(data_model=data_model, screens=screens)
+    print(template)
     llm = OpenAILangChainV2(template)
     llm.chat_history = state["messages"]
     answer = llm.predict(state["question_in_english"])

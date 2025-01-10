@@ -19,8 +19,9 @@ CSHARP_DATATYPES = [
     "DateTime"
 ]
 
-def parse_context_json_v2(context: dict) -> str:
-    """Approach 2: Using hardcoded data types.
+def parse_context_fields(context: dict) -> str:
+    """ Parse context data fields.
+        Approach 2: Using hardcoded data types.
         Assumptions (may need corrections):
         - if dataType is a predefined dataType, it is a simple datatype (str,int,etc)
         - if dataType is not simple and children are empty and dataTypeComponents exist, it is a structure
@@ -32,6 +33,7 @@ def parse_context_json_v2(context: dict) -> str:
     fields_processed = []
     try:
         fields = context["fields"]
+        print(fields)
         for field in fields:
             if field["dataType"] in CSHARP_DATATYPES:
                 fields_processed.append(f"PF.{field["symbol"]}: {field["dataType"]}")
@@ -50,10 +52,29 @@ def parse_context_json_v2(context: dict) -> str:
                     else:
                         fields_processed.append(f"PF.{structure}: Table")
                         for child in field["children"][0]["children"]:
-                            fields_processed.append(f"  {child["symbol"]}: Str")
+                            fields_processed.append(f" * {child["symbol"]}: Str")
     except Exception as e:
         fields_processed.append(f"Data model not available due to error: {str(e)}. Ask user to provide data model.")
 
     fields_processed_joined = "\n".join(fields_processed)
 
     return fields_processed_joined
+
+
+def parse_context_screens(context: dict) -> str:
+    """Parse screens from context."""
+
+    screens_processed = []
+    try:
+        screens = context["screens"]
+        print(screens)
+        for screen in screens:
+            screens_processed.append(f"{screen["symbol"]} (alias:{screen['name']})")
+
+    except Exception as e:
+        screens_processed.append(
+            f"Screens not available due to error: {str(e)}. Ask user to provide available screens.")
+
+    screens_processed_joined = "\n".join(screens_processed)
+
+    return screens_processed_joined

@@ -76,7 +76,7 @@ def generate_rule(state: GraphState) -> dict:
 
     ## 1. Available Process Fields:
     
-    {data_model}
+{data_model}
     
 
     ### Properties:
@@ -94,7 +94,7 @@ def generate_rule(state: GraphState) -> dict:
 
     ## 2. Available Screens:
     
-    {screens}
+{screens}
 
     ### Methods:
     Screens can be accessed by `G.`.

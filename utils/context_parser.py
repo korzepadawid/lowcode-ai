@@ -33,26 +33,25 @@ def parse_context_fields(context: dict) -> str:
     fields_processed = []
     try:
         fields = context["fields"]
-        print(fields)
         for field in fields:
             if field["dataType"] in CSHARP_DATATYPES:
-                fields_processed.append(f"PF.{field["symbol"]}: {field["dataType"]}")
+                fields_processed.append(f"\tPF.{field["symbol"]}: {field["dataType"]}")
             else:
                 structure = field["dataType"].split(".")[-1]
                 if not field["children"]:
                     if field["dataTypeComponents"]:
                         for component in field["dataTypeComponents"]:
-                            fields_processed.append(f"PF.{structure}.{component['symbol']}: {component['type']}")
+                            fields_processed.append(f"\tPF.{structure}.{component['symbol']}: {component['type']}")
                     else:
-                        fields_processed.append(f"PF.{structure}: Table")
+                        fields_processed.append(f"\tPF.{structure}: Table")
                 else:
                     if field["dataTypeComponents"]:
                         for component in field["dataTypeComponents"]:
-                            fields_processed.append(f"PF.{structure}.{component['symbol']}: {component['type']}")
+                            fields_processed.append(f"\tPF.{structure}.{component['symbol']}: {component['type']}")
                     else:
-                        fields_processed.append(f"PF.{structure}: Table")
+                        fields_processed.append(f"\tPF.{structure}: Table")
                         for child in field["children"][0]["children"]:
-                            fields_processed.append(f" * {child["symbol"]}: Str")
+                            fields_processed.append(f"\t\t* {child["symbol"]}: Str")
     except Exception as e:
         fields_processed.append(f"Data model not available due to error: {str(e)}. Ask user to provide data model.")
 
@@ -69,7 +68,7 @@ def parse_context_screens(context: dict) -> str:
         screens = context["screens"]
         print(screens)
         for screen in screens:
-            screens_processed.append(f"{screen["symbol"]} (alias:{screen['name']})")
+            screens_processed.append(f"\t{screen["symbol"]} (alias:{screen['name']})")
 
     except Exception as e:
         screens_processed.append(

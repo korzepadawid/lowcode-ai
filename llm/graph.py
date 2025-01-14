@@ -6,6 +6,7 @@ from langchain_core.messages import BaseMessage
 from llm.base import LLMBase
 from llm.bielik import BielikLLM
 from llm.openai2 import OpenAILangChainV2
+from llm import utils
 from langchain_core.messages import HumanMessage, AIMessage
 
 VALIDATION_TYPE = "VALIDATION"
@@ -223,7 +224,7 @@ def translate_en_to_pl(state: GraphState) -> dict:
 
 def determine_question_type(state: GraphState) -> dict:
     ctx = state["context"]
-    location = ctx["location"]
+    location = ctx.get("location", GENERAL)
     if "bpmnDesigner" in location:
         return {"question_type": RULE_TYPE}
     elif "validation" in location:
@@ -232,9 +233,22 @@ def determine_question_type(state: GraphState) -> dict:
 
 
 def general(state: GraphState) -> dict:
+    wiki_data = utils.retrieve_wiki(state["question"])
+    template = """
+    Jesteś pomocnym asystentem. Mając na uwadze następujące informacje:
+
+    {context}
+
+    Odpowiedz na pytanie:
+    """
+    context = "\n".join(wiki_data)
+    template = template.format(context=context)
+    llm = BielikLLM(template)
+    answer = llm.predict(state["question"])
+    logger.info("Answer: %s", answer)
     return {
-        "response": "Tu bedzie integracja z dokumentacja 😊",
-        "response_in_english": "There will be integration with documentation 😊",
+        "response": answer,
+        "response_in_english": answer,
     }
 
 
@@ -274,7 +288,9 @@ class LangGraphLLM(LLMBase):
         self.chat_history.extend([HumanMessage(content=user), AIMessage(content=ai)])
 
     def add_base_history(self, user: str, ai: str) -> None:
-        self.base_chat_history.extend([HumanMessage(content=user), AIMessage(content=ai)])
+        self.base_chat_history.extend(
+            [HumanMessage(content=user), AIMessage(content=ai)]
+        )
 
     def predict(self, input_query: str, question_type: str) -> dict:
         inputs = {
@@ -282,6 +298,6 @@ class LangGraphLLM(LLMBase):
             "question_type": question_type,
             "messages": self.chat_history,
             "base_messages": self.base_chat_history,
-            "context": self.context
+            "context": self.context,
         }
         return self.graph.invoke(inputs)

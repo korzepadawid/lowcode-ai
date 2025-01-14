@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
+from langchain.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.messages import HumanMessage, AIMessage
 

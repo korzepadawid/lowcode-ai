@@ -5,8 +5,7 @@ from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import BaseMessage
 from llm.base import LLMBase
 from llm.bielik import BielikLLM
-from llm.codestral import CodestralLLM
-# from llm.openai2 import OpenAILangChainV2
+from llm.openai2 import OpenAILangChainV2
 from langchain_core.messages import HumanMessage, AIMessage
 
 VALIDATION_TYPE = "WALIDACJA"
@@ -55,7 +54,7 @@ def generate_validation(state: GraphState) -> dict:
     Always remember: respond with code only, unless instructed otherwise.
 
     """
-    llm = CodestralLLM(template)
+    llm = OpenAILangChainV2(template)
     llm.chat_history = state["messages"]
     logger.info("Input (validation): %s", state["question_in_english"])
     answer = llm.predict(state["question_in_english"])
@@ -158,7 +157,7 @@ def generate_rule(state: GraphState) -> dict:
 
     Always remember: respond with code only, unless instructed otherwise.
     """
-    llm = CodestralLLM(template)
+    llm = OpenAILangChainV2(template)
     llm.chat_history = state["messages"]
     answer = llm.predict(state["question_in_english"])
     logger.info("Code generated: %s", answer)

@@ -20,7 +20,7 @@ def retrieve_wiki(query: str) -> List[str]:
                 continue
             page = item["page"]
             if "text_raw" in page:
-                results.append(page["text_raw"])
+                results.append(page["text_raw"].replace("{", "").replace("}", ""))
     else:
         print(
             f"Request from Ferryt Wiki failed with status code {response.status_code}"

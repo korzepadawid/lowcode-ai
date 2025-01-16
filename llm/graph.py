@@ -239,7 +239,7 @@ def general(state: GraphState) -> dict:
 
     {context}
 
-    Odpowiedz na pytanie:
+    Odpowiedz na pytanie, zachec do zadania kolejnego, uzyj emoji na koncu odpowiedzi:
     """
     context = "\n".join(wiki_data)
     template = template.format(context=context)

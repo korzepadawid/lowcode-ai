@@ -8,9 +8,9 @@ from llm.bielik import BielikLLM
 from llm.openai2 import OpenAILangChainV2
 from langchain_core.messages import HumanMessage, AIMessage
 
-VALIDATION_TYPE = "VALIDATION"
-RULE_TYPE = "RULE"
-GENERAL = "GENERAL"
+VALIDATION_TYPE = "WALIDACJA"
+RULE_TYPE = "REGUŁA"
+GENERAL = "OGÓLNE"
 
 QUESTION_TYPES = [VALIDATION_TYPE, RULE_TYPE, GENERAL]
 
@@ -223,27 +223,48 @@ def translate_en_to_pl(state: GraphState) -> dict:
 
 def determine_question_type(state: GraphState) -> dict:
     template = """
-    Jesteś systemem odpowiedzialnym za wykrywanie typu pytania. Działasz na platformie low-code Ferryt, która umożliwia tworzenie aplikacji webowych w oparciu o diagramy BPMN.
+    Jesteś klasyfikatorem, który identyfikuje typ pytania na podstawie następujących kategorii:
 
-    ### Zasady działania:
-    - Jeśli pytanie lub prośba zawiera:  
-    - Odwołania do funkcji programistycznych (np. `SetEditable(bool)`, `SetVisible(bool)`, `GetValueOrDefault(defaultValue)` itp.).  
-    - Odniesienia do pól, zmiennych, reguł biznesowych lub logiki walidacji (np. `PF.DKL_DaneKlienta_S.RodzajKonta`).  
-    - Polecenia dotyczące generowania, poprawiania lub analizowania kodu.  
-    W takich przypadkach zwróć odpowiedź: **CODE**.  
+    1. **Prośba o wygenerowanie kodu do walidatora**: 
+       - Pytania dotyczące tworzenia kodu w celu weryfikacji danych wejściowych zgodnie z określonymi regułami lub formatami (np. weryfikacja adresów e-mail, numeru pesel, dat itp.).
+       - Przykłady:
+            1. Napisz walidator pesel.
+            2. Czy potrafisz napisać walidator NIP, który sprawdza poprawność numeru NIP, uwzględniając liczbę cyfr i format?
+            3. Zaimplementuj walidator kodu pocztowego.
+            4. Daj mi walidator wieku, który ocenia, czy użytkownik ma wiek mieszczący się w przedziale 18-60 lat.
+            5. Przygotuj sprawdzenie daty, czy jest w formacie dd/mm/yyyy.
+            6. Wygeneruj walidator numeru karty kredytowej.
+            7. Stwórz walidator numeru telefonu.
+            8. Jak napisać walidator numeru telefonu?
+            9. Sprawdzenie czy wiek jest większy niż 75 lat.
+            10. Walidacja czy liczba jest w zakresie 1-1000.
 
-    - Jeśli pytanie dotyczy dokumentacji lub ma charakter ogólny, zwróć odpowiedź: **GENERAL**.  
+    2. **Prośba o wygenerowanie kodu dla reguły**:
+       - Pytania dotyczące reguł biznesowych, które są definiowane w ramach procesów BPMN i służą do automatyzacji decyzji oraz sterowania przepływem procesów na podstawie określonych warunków.
+        - Przykłady:
+            1. Ustaw odrzucenie przez wiek na true jeżeli jeden członek rodziny jest niepełnoletni.
+            2. Sprawdź czy w rodzinie istnieje osoba starsza niż 80 lat, jeśli tak zmień składkę podstawową na 100 * ilość osób w rodzinie.
+            3. Jeśli typ pojazdu jest ustawiony to pokaż pole z jego marką.
+            4. Jeśli AC jest wyłączone i NNW jest włączone, przypisz kwotę polisy 2700.
+            5. Wyświetl wiadomość jeśli nie jest pusta.
+            6. Ustaw rodzaj karty na Junior jeśli rodzaj konta ma wartość „dla młodych” i wiek jest mniejszy od 21. 
+            7. Ustaw wszystkie pola z danych klienta z wyjątkiem numeru konta na edytowalne, widoczne i wymagalne. Numer konta ma być tylko widoczny.
+            8. Jeśli login aktualnego użytkownika jest zgodny z tym z danych klienta i jest uwierzytelniony, to przypisz do danych klienta jego imię i nazwisko, email i ID.
+            9. Sprawdź czy aktualnie podany numer konta w tablicy z danymi klienta znajduje się już w niej w innych wierszach. Jeśli nie, to w przypadku gdy użytkownik logował się na urządzeniu mobilnym, to pokaż zostaw widoczny jedynie ekran Tech_ErrorMessage.
+            10. Ustaw minimalną długość tablicy z danymi rodziny na 1.
 
-    Zwracaj wyłącznie odpowiedź: **CODE** lub **GENERAL**, bez dodatkowych informacji ani komentarzy.
 
-    Tekst pytania: {input}
+    3. **Pytania ogólne**:
+       - Pytania ogólne, które nie klasyfikują się do poprzednich typów pytań.
+
+
+    **Odpowiedz tylko jednym słowem WALIDACJA, REGUŁA, OGÓLNE według pasującej kategorii.**
     """
     llm = BielikLLM(template)
-    answer = llm.predict(state["question"])
+    prompt = f'Pytanie: {state["question"]}'
+    answer = llm.predict(prompt)
     logger.info("Detected question type: %s", answer)
-    if answer == GENERAL:
-        return {"question_type": GENERAL}
-    return {"question_type": state["question_type"]}
+    return {"question_type": answer}
 
 
 def general(state: GraphState) -> dict:

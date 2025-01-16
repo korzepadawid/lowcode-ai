@@ -239,7 +239,7 @@ def determine_question_type(state: GraphState) -> dict:
             8. Jak napisać walidator numeru telefonu?
             9. Sprawdzenie czy wiek jest większy niż 75 lat.
             10. Walidacja czy liczba jest w zakresie 1-1000.
-    
+
     2. **Prośba o wygenerowanie kodu dla reguły**:
        - Pytania dotyczące reguł biznesowych, które są definiowane w ramach procesów BPMN i służą do automatyzacji decyzji oraz sterowania przepływem procesów na podstawie określonych warunków.
         - Przykłady:
@@ -248,22 +248,24 @@ def determine_question_type(state: GraphState) -> dict:
             3. Jeśli typ pojazdu jest ustawiony to pokaż pole z jego marką.
             4. Jeśli AC jest wyłączone i NNW jest włączone, przypisz kwotę polisy 2700.
             5. Wyświetl wiadomość jeśli nie jest pusta.
-    
+            6. Ustaw rodzaj karty na Junior jeśli rodzaj konta ma wartość „dla młodych” i wiek jest mniejszy od 21. 
+            7. Ustaw wszystkie pola z danych klienta z wyjątkiem numeru konta na edytowalne, widoczne i wymagalne. Numer konta ma być tylko widoczny.
+            8. Jeśli login aktualnego użytkownika jest zgodny z tym z danych klienta i jest uwierzytelniony, to przypisz do danych klienta jego imię i nazwisko, email i ID.
+            9. Sprawdź czy aktualnie podany numer konta w tablicy z danymi klienta znajduje się już w niej w innych wierszach. Jeśli nie, to w przypadku gdy użytkownik logował się na urządzeniu mobilnym, to pokaż zostaw widoczny jedynie ekran Tech_ErrorMessage.
+            10. Ustaw minimalną długość tablicy z danymi rodziny na 1.
+
+
     3. **Pytania ogólne**:
        - Pytania ogólne, które nie klasyfikują się do poprzednich typów pytań.
-    
-    Sklasyfikuj poniższe pytania do jednej z istniejących kategorii.
-    
-    Pytanie: "{user_question}"
-    Odpowiedz jako jedna z kategorii:
-    "[WALIDACJA / REGUŁA / OGÓLNE]"
+
+
+    **Odpowiedz tylko jednym słowem WALIDACJA, REGUŁA, OGÓLNE według pasującej kategorii.**
     """
     llm = BielikLLM(template)
-    answer = llm.predict(state["question"])
+    prompt = f'Pytanie: {state["question"]}'
+    answer = llm.predict(prompt)
     logger.info("Detected question type: %s", answer)
-    if answer == GENERAL:
-        return {"question_type": GENERAL}
-    return {"question_type": state["question_type"]}
+    return {"question_type": answer}
 
 
 def general(state: GraphState) -> dict:

@@ -1,9 +1,11 @@
 import json
 import logging
+import time
 import uuid
 from typing import List
 
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework import views, status
@@ -18,7 +20,7 @@ from chat.serializers import (
     ChatInputSerializer,
     MessageSerializer,
 )
-from llm.graph import LangGraphLLM
+from llm.graph import GENERAL, LangGraphLLM
 from langchainopenai import OpenAILangChain
 
 logger = logging.getLogger("chat")
@@ -81,27 +83,37 @@ class MessageCreateAPIView(views.APIView):
         logger.info(f"Context: {serializer.validated_data.get('context', {})}")
         context = serializer.validated_data.get("context", {})
 
-        llm = LangGraphLLM(thread_id=thread.uuid, context=context)
-        messages = get_sorted_messages_v2(thread)
+        try:
+            llm = LangGraphLLM(thread_id=thread.uuid, context=context)
+            messages = get_sorted_messages_v2(thread)
 
-        for message in messages:
-            llm.add_history(user=message.input_translated, ai=message.answer_translated)
-            llm.add_base_history(user=message.input, ai=message.answer)
+            for message in messages:
+                llm.add_history(user=message.input_translated, ai=message.answer_translated)
+                llm.add_base_history(user=message.input, ai=message.answer)
 
-        response = llm.predict(
-            input_query=input_query,
-            question_type="VALIDATION",
-        )
-        message = Message.objects.create(
-            thread=thread,
-            input=response["question"],
-            answer=response["response"],
-            input_translated=response["question_in_english"],
-            answer_translated=response["response_in_english"],
-        )
-        return Response(
-            MessageSerializer(instance=message).data, status=status.HTTP_201_CREATED
-        )
+            response = llm.predict(
+                input_query=input_query,
+                question_type=GENERAL,
+            )
+            message = Message.objects.create(
+                thread=thread,
+                input=response["question"],
+                answer=response["response"],
+                input_translated=response["question_in_english"],
+                answer_translated=response["response_in_english"],
+            )
+            return Response(
+                MessageSerializer(instance=message).data, status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            logger.error(f"Error processing message: {e}")
+            message_instance = Message(
+                id=-1,
+                answer="Wybacz, ale nie mogłem udzielić odpowiedzi, stwórz nowy wątek i zadaj pytanie ponownie 🤗",
+                created_at=now(),
+            )
+            serializer = MessageSerializer(message_instance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_thread_from_req(self) -> Thread:
         thread_uuid = self.kwargs.get("uuid")

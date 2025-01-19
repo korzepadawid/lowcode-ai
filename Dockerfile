@@ -1,23 +1,23 @@
-FROM python:3.10-alpine as base
-RUN apk add --update --virtual .build-deps \
-    build-base \
-    postgresql-dev \
-    python3-dev \
-    libpq
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+&& rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
 
 COPY requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-FROM python:3.10-alpine
-RUN apk add libpq
-COPY --from=base /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
-COPY --from=base /usr/local/bin/ /usr/local/bin/
 COPY . /app
-ENV PYTHONUNBUFFERED 1
-ENV DEBUG 0
-WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1
+ENV DEBUG=0
+
 EXPOSE 8000
-RUN ls -l entrypoint.sh
-RUN chmod +x ./entrypoint.sh
+
+RUN chmod +x /app/entrypoint.sh
+
 ENTRYPOINT ["./entrypoint.sh"]
 

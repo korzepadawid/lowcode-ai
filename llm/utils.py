@@ -1,43 +1,30 @@
-import re
+import requests
 
-from typing import Tuple
-from collections import deque
-
-CODE_BLOCK_PLACEHOLDER = "<CODE_BLOCK>"
+from typing import List
 
 
-def extract_code_blocks(text: str) -> Tuple[deque, str]:
-    """
-    Extract code blocks from a string and return a queue of code blocks and a string with
-    all code blocks replaced by a placeholder <CODE_BLOCK>.
-
-    :param text: The string to extract code blocks from.
-    :return: A tuple of a queue of code blocks and a string where all code blocks have been
-             replaced by a placeholder.
-    """
-    text_no_code, _ = re.subn(
-        r"```.*?```",
-        CODE_BLOCK_PLACEHOLDER,
-        text,
-        flags=re.DOTALL | re.MULTILINE,
-        count=10,
+def retrieve_wiki(query: str) -> List[str]:
+    headers = {"accept": "application/json", "Content-Type": "application/json"}
+    data = {"query": query, "collection_name": "KartonBERT_USE_base_v1"}
+    response = requests.post(
+        "https://ferryt-rag.csi.wmi.amu.edu.pl/api/retrieve",
+        headers=headers,
+        json=data,
     )
-    pattern = r"^```(?:\w+)?\s*\n(.*?)(?=^```)```"
-    result = re.finditer(pattern, text, re.DOTALL | re.MULTILINE)
-    queue = deque([])
-    for match in result:
-        queue.append(match.group(0))
-    return queue, text_no_code
-
-
-def replace_code_blocks(queue: deque, text: str) -> str:
-    """
-    Replace all code blocks in a string with the first code block in the queue.
-
-    :param queue: The queue of code blocks to replace.
-    :param text: The string to replace code blocks in.
-    :return: A string with all code blocks replaced by the first code block in the queue.
-    """
-    while queue:
-        text = text.replace(CODE_BLOCK_PLACEHOLDER, queue.popleft(), 1)
-    return text
+    results = []
+    if response.status_code == 200:
+        print("Response from Ferryt Wiki:", response.json())
+        data = response.json()
+        for item in data:
+            if "page" not in item:
+                continue
+            page = item["page"]
+            if "text_raw" in page:
+                results.append(page["text_raw"].replace("{", "").replace("}", ""))
+    else:
+        print(
+            f"Request from Ferryt Wiki failed with status code {response.status_code}"
+        )
+        print("Response from Ferryt Wiki Text:", response.text)
+        return []
+    return results

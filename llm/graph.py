@@ -78,6 +78,7 @@ def generate_rule(state: GraphState) -> dict:
     - `PF.UR_DaneKlienta_S.Nazwisko` : String
     - `PF.UR_DaneKlienta_S.Email` : String
     - `PF.UR_DaneKlienta_S.NrTelefonu` : String
+    - `PF.UR_DaneKlienta_S.PESEL` : String
     
     - `PF.UR_DaneRodziny_T` : table
         * Imie

@@ -161,6 +161,9 @@ def generate_rule(state: GraphState) -> dict:
 
     Always remember: respond with code only, unless instructed otherwise.
     """
+
+
+
     llm = OpenAILangChainV2(template)
     llm.chat_history = state["messages"]
     answer = llm.predict(state["question_in_english"])

@@ -1,0 +1,661 @@
+{
+  "content": ".",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmZXJyeXRfc2Vzc2lvbiI6IjUxMmUwN2M1LWM5MzctNDJhOS05ODNmLTk4YTkwMDllNjUxZSIsImp0aSI6IjM0ZTMwZDJiLWY4MjgtNGE5ZC1iODg1LTg1YTE1MjVmZjA3YyIsImZlcnJ5dF91c2VyIjoiMzMiLCJzdWIiOiJNYWdpc3RlcjEiLCJmZXJyeXRfdXNlcl9pbmZvIjoiMSIsImZlcnJ5dF9zZXJ2ZXJfY29udGV4dCI6ImZvbmUiLCJmZXJyeXRfbGluayI6ImFyY2hpdGVjdCIsImZlcnJ5dF9hc3NpZ25tZW50IjoiQXJjaGl0ZWN0IiwibmJmIjoxNzM3OTA1MjcwLCJleHAiOjE3Mzc5MDg4NzAsImlhdCI6MTczNzkwNTI3MCwiaXNzIjoiRmVycnl0SXNzdWVyIiwiYXVkIjoiRmVycnl0In0.No8PmBTJmGYcaA32jVEp5tvSWNte0axh8tz77GksAGc",
+  "chatId": 769,
+  "urlBeginning": "https://uamedu.domdata.com",
+  "backendUrl": "http://bikol.vm.wmi.amu.edu.pl:8000",
+  "context": {
+    "fields": [
+      {
+        "children": [],
+        "dataType": "String",
+        "dataTypeComponents": [],
+        "domainId": 21,
+        "id": 1388,
+        "name": "UR_KodZnizkowy",
+        "symbol": "UR_KodZnizkowy",
+        "unitId": 79
+      },
+      {
+        "children": [],
+        "dataType": "Bool",
+        "dataTypeComponents": [],
+        "domainId": 21,
+        "id": 1389,
+        "name": "UR_OdrzuceniePrzezWiek",
+        "symbol": "UR_OdrzuceniePrzezWiek",
+        "unitId": 79
+      },
+      {
+        "children": [],
+        "dataType": "String",
+        "dataTypeComponents": [],
+        "domainId": 21,
+        "id": 1385,
+        "name": "UR_RodzajUbezpieczenia",
+        "symbol": "UR_RodzajUbezpieczenia",
+        "unitId": 79
+      },
+      {
+        "children": [],
+        "dataType": "Decimal",
+        "dataTypeComponents": [],
+        "domainId": 21,
+        "id": 1390,
+        "name": "UR_Skladka",
+        "symbol": "UR_Skladka",
+        "unitId": 79
+      },
+      {
+        "children": [],
+        "complexDataType": "Table",
+        "dataType": "LowCodeAI.LowCodeAI.UR_DaneRodziny_T",
+        "dataTypeComponents": [
+          {
+            "name": "Imię",
+            "symbol": "Imie",
+            "type": "String"
+          },
+          {
+            "name": "Nazwisko",
+            "symbol": "Nazwisko",
+            "type": "String"
+          },
+          {
+            "name": "Wiek",
+            "symbol": "Wiek",
+            "type": "Int"
+          },
+          {
+            "complexDataType": "Structure",
+            "dataTypeComponents": [
+              {
+                "name": "Miejscowosc",
+                "symbol": "Miejscowosc",
+                "type": "String"
+              },
+              {
+                "name": "Ulica",
+                "symbol": "Ulica",
+                "type": "String"
+              },
+              {
+                "name": "KodPocztowy",
+                "symbol": "KodPocztowy",
+                "type": "String"
+              }
+            ],
+            "name": "Adres",
+            "symbol": "Adres",
+            "type": "LowCodeAI.LowCodeAI.UR_Adres_S"
+          },
+          {
+            "complexDataType": "Structure",
+            "dataTypeComponents": [
+              {
+                "name": "NumerIndeksu",
+                "symbol": "NumerIndeksu",
+                "type": "String"
+              },
+              {
+                "name": "Kierunek",
+                "symbol": "Kierunek",
+                "type": "String"
+              },
+              {
+                "complexDataType": "Structure",
+                "dataTypeComponents": [
+                  {
+                    "name": "Nazwa",
+                    "symbol": "Nazwa",
+                    "type": "String"
+                  },
+                  {
+                    "name": "Typ",
+                    "symbol": "Typ",
+                    "type": "String"
+                  }
+                ],
+                "name": "Uczelnia",
+                "symbol": "Uczelnia",
+                "type": "LowCodeAI.LowCodeAI.UR_Uczelnia_S"
+              }
+            ],
+            "name": "DaneStudenta",
+            "symbol": "DaneStudenta",
+            "type": "LowCodeAI.LowCodeAI.UR_DaneStudenta_S"
+          }
+        ],
+        "domainId": 21,
+        "id": 1384,
+        "name": "UR_DaneRodziny_T",
+        "symbol": "UR_DaneRodziny_T",
+        "unitId": 79
+      },
+      {
+        "children": [],
+        "dataType": "String",
+        "dataTypeComponents": [],
+        "domainId": 21,
+        "id": 1391,
+        "name": "tech_Message",
+        "symbol": "tech_Message",
+        "unitId": 79
+      },
+      {
+        "children": [],
+        "dataType": "String",
+        "dataTypeComponents": [],
+        "domainId": 21,
+        "id": 1387,
+        "name": "UR_PoziomUbezpieczenia",
+        "symbol": "UR_PoziomUbezpieczenia",
+        "unitId": 79
+      },
+      {
+        "children": [],
+        "dataType": "Bool",
+        "dataTypeComponents": [],
+        "domainId": 21,
+        "id": 1386,
+        "name": "UR_UbezpieczenieDodatkowe",
+        "symbol": "UR_UbezpieczenieDodatkowe",
+        "unitId": 79
+      },
+      {
+        "children": [
+          {
+            "clientValidationId": 158,
+            "symbol": "Email",
+            "type": "Default"
+          },
+          {
+            "clientValidationId": 159,
+            "symbol": "NrTelefonu",
+            "type": "Default"
+          },
+          {
+            "clientValidationId": 162,
+            "symbol": "PESEL",
+            "type": "Default"
+          }
+        ],
+        "complexDataType": "Structure",
+        "dataType": "LowCodeAI.LowCodeAI.UR_DaneKlienta_S",
+        "dataTypeComponents": [
+          {
+            "name": "Imię",
+            "symbol": "Imie",
+            "type": "String"
+          },
+          {
+            "name": "Nazwisko",
+            "symbol": "Nazwisko",
+            "type": "String"
+          },
+          {
+            "name": "Email",
+            "symbol": "Email",
+            "type": "String"
+          },
+          {
+            "name": "PESEL",
+            "symbol": "PESEL",
+            "type": "String"
+          },
+          {
+            "complexDataType": "Structure",
+            "dataTypeComponents": [
+              {
+                "name": "Miejscowosc",
+                "symbol": "Miejscowosc",
+                "type": "String"
+              },
+              {
+                "name": "Ulica",
+                "symbol": "Ulica",
+                "type": "String"
+              },
+              {
+                "name": "KodPocztowy",
+                "symbol": "KodPocztowy",
+                "type": "String"
+              }
+            ],
+            "name": "Adres_S",
+            "symbol": "Adres_S",
+            "type": "LowCodeAI.LowCodeAI.UR_Adres_S"
+          },
+          {
+            "complexDataType": "Structure",
+            "dataTypeComponents": [
+              {
+                "name": "NumerKierunkowy",
+                "symbol": "NumerKierunkowy",
+                "type": "String"
+              },
+              {
+                "name": "Numer",
+                "symbol": "Numer",
+                "type": "String"
+              }
+            ],
+            "name": "NumerTelefonu",
+            "symbol": "NumerTelefonu",
+            "type": "LowCodeAI.LowCodeAI.UR_NumerTelefonu_S"
+          },
+          {
+            "complexDataType": "Structure",
+            "dataTypeComponents": [
+              {
+                "name": "Rok",
+                "symbol": "Rok",
+                "type": "Int"
+              },
+              {
+                "name": "Miesiac",
+                "symbol": "Miesiac",
+                "type": "Int"
+              }
+            ],
+            "name": "OkresRozliczeniowy",
+            "symbol": "OkresRozliczeniowy",
+            "type": "LowCodeAI.LowCodeAI.UR_OkresRozliczeniowy_S"
+          },
+          {
+            "complexDataType": "Structure",
+            "dataTypeComponents": [
+              {
+                "name": "Pracodawca",
+                "symbol": "Pracodawca",
+                "type": "String"
+              },
+              {
+                "name": "OddzialNFZ",
+                "symbol": "OddzialNFZ",
+                "type": "String"
+              }
+            ],
+            "name": "DaneUbezpieczenieZdrowotne",
+            "symbol": "DaneUbezpieczenieZdrowotne",
+            "type": "LowCodeAI.LowCodeAI.UR_DaneUbezpieczenieZdrowotne_S"
+          },
+          {
+            "complexDataType": "Structure",
+            "dataTypeComponents": [
+              {
+                "complexDataType": "Structure",
+                "dataTypeComponents": [
+                  {
+                    "name": "CzyWypelniona",
+                    "symbol": "CzyWypelniona",
+                    "type": "Bool"
+                  },
+                  {
+                    "name": "Tresc",
+                    "symbol": "Tresc",
+                    "type": "String"
+                  }
+                ],
+                "name": "ZgodaNaKorespondencje",
+                "symbol": "ZgodaNaKorespondencje",
+                "type": "LowCodeAI.LowCodeAI.UR_ZgodaNaKorespondencje_S"
+              },
+              {
+                "complexDataType": "Structure",
+                "dataTypeComponents": [
+                  {
+                    "name": "CzyWypelniona",
+                    "symbol": "CzyWypelniona",
+                    "type": "Bool"
+                  },
+                  {
+                    "name": "Tresc",
+                    "symbol": "Tresc",
+                    "type": "String"
+                  }
+                ],
+                "name": "ZgodaNaRodo",
+                "symbol": "ZgodaNaRodo",
+                "type": "LowCodeAI.LowCodeAI.UR_ZgodaNaRodo_S"
+              }
+            ],
+            "name": "Zgody",
+            "symbol": "Zgody",
+            "type": "LowCodeAI.LowCodeAI.UR_Zgody_S"
+          }
+        ],
+        "domainId": 21,
+        "id": 1383,
+        "name": "UR_DaneKlienta_S",
+        "symbol": "UR_DaneKlienta_S",
+        "unitId": 79
+      }
+    ],
+    "ruleSet": {
+      "code": "G.HideAll();\r\nG.E010_Powitanie.Show();",
+      "headers": [
+        "#load \"Main.csx\""
+      ],
+      "id": "RuleSet_rn1BKwAI0yZ",
+      "rules": {
+        "rule_0": {
+          "active": true,
+          "conditionCode": "",
+          "elseCode": "",
+          "priority": 0,
+          "symbol": "rule_0",
+          "thenCode": ""
+        }
+      },
+      "symbol": "RuleSet_rn1BKwAI0yZ"
+    },
+    "screens": [
+      {
+        "id": 1749,
+        "name": "Tech_BottomScreen",
+        "symbol": "Tech_BottomScreen"
+      },
+      {
+        "id": 1750,
+        "name": "Tech_TopScreen",
+        "symbol": "Tech_TopScreen"
+      },
+      {
+        "id": 1751,
+        "name": "Tech_TabsScreen",
+        "symbol": "Tech_TabsScreen"
+      },
+      {
+        "id": 1752,
+        "name": "Tech_SessionEndScreen",
+        "symbol": "Tech_SessionEndScreen"
+      },
+      {
+        "id": 1756,
+        "name": "Zgody",
+        "symbol": "E040_Zgody"
+      },
+      {
+        "id": 1754,
+        "name": "Dane rodziny",
+        "symbol": "E020_DaneRodziny"
+      },
+      {
+        "id": 1755,
+        "name": "Wybór ubezpieczenia",
+        "symbol": "E030_WyborUbezpieczenia"
+      },
+      {
+        "id": 1753,
+        "name": "Powitanie",
+        "symbol": "E010_Powitanie"
+      },
+      {
+        "id": 1759,
+        "name": "E_techMessage",
+        "symbol": "E_techMessage"
+      },
+      {
+        "id": 1757,
+        "name": "Podsumowanie",
+        "symbol": "E050_Podsumowanie"
+      },
+      {
+        "id": 1758,
+        "name": "Odrzucenie",
+        "symbol": "E060_Odrzucenie"
+      }
+    ],
+    "tasks": [
+      {
+        "actionsList": [],
+        "enabled": true,
+        "fieldConfiguration": [],
+        "id": "Ugk7uvCAqE6",
+        "name": "InitialEvent0",
+        "relations": [
+          {
+            "id": "arrow_rS9mmDmOK",
+            "targetId": "UOVxuqQ5Fyv",
+            "type": "Arrow"
+          }
+        ],
+        "screenConfiguration": [],
+        "type": "FlowInitialEvent"
+      },
+      {
+        "actionsList": [
+          {
+            "actionId": "nhgsEfqF95n",
+            "actionType": "StateIn",
+            "name": "InUserTask0",
+            "symbol": "InUserTask0"
+          },
+          {
+            "actionId": "iyzxYmuxN4i",
+            "actionType": "StateOut",
+            "name": "OutUserTask0",
+            "symbol": "OutUserTask0"
+          },
+          {
+            "actionId": "NuO4oLfkKJ",
+            "actionType": "Standard",
+            "name": "a010_nextTask",
+            "symbol": "a010_nextTask"
+          }
+        ],
+        "enabled": true,
+        "fieldConfiguration": [],
+        "id": "UOVxuqQ5Fyv",
+        "name": "ut010_Powitanie",
+        "relations": [
+          {
+            "id": "arrow_lsxjLzbIb",
+            "targetId": "lQVAoAT3l2",
+            "type": "Arrow"
+          }
+        ],
+        "screenConfiguration": [],
+        "type": "FlowUserTask"
+      },
+      {
+        "actionsList": [
+          {
+            "actionId": "YQvgMTa6WA",
+            "actionType": "StateIn",
+            "name": "InUserTask0_0",
+            "symbol": "InUserTask0_0"
+          },
+          {
+            "actionId": "kmycp5fOoh",
+            "actionType": "StateOut",
+            "name": "OutUserTask0_0",
+            "symbol": "OutUserTask0_0"
+          },
+          {
+            "actionId": "OnAJ725Xa",
+            "actionType": "Standard",
+            "name": "a020_calculateRisk",
+            "symbol": "a020_calculateRisk"
+          },
+          {
+            "actionId": "lBMUADenIm",
+            "actionType": "Standard",
+            "name": "a020_nextTask",
+            "symbol": "a020_nextTask"
+          }
+        ],
+        "enabled": true,
+        "fieldConfiguration": [],
+        "id": "lQVAoAT3l2",
+        "name": "ut020_DaneRodziny",
+        "relations": [
+          {
+            "id": "arrow_AOzFCWmA1",
+            "targetId": "iCKdg2MRVkA",
+            "type": "Arrow"
+          },
+          {
+            "id": "arrow_zTACeYl5k",
+            "targetId": "AU21puu7Xk",
+            "type": "Arrow"
+          }
+        ],
+        "screenConfiguration": [],
+        "type": "FlowUserTask"
+      },
+      {
+        "actionsList": [
+          {
+            "actionId": "HG0suH57msL",
+            "actionType": "StateIn",
+            "name": "InUserTask0_1",
+            "symbol": "InUserTask0_1"
+          },
+          {
+            "actionId": "zUV6uqXFq",
+            "actionType": "Standard",
+            "name": "a030_calculateFee",
+            "symbol": "a030_calculateFee"
+          },
+          {
+            "actionId": "DayCh3AKizF",
+            "actionType": "StateOut",
+            "name": "OutUserTask0_1",
+            "symbol": "OutUserTask0_1"
+          },
+          {
+            "actionId": "OhERXDJ0km",
+            "actionType": "Standard",
+            "name": "ChangeState_ut030_WyborUbezpieczenia_UserTask0",
+            "symbol": "a030_nextStatus"
+          }
+        ],
+        "enabled": true,
+        "fieldConfiguration": [],
+        "id": "iCKdg2MRVkA",
+        "name": "ut030_WyborUbezpieczenia",
+        "relations": [
+          {
+            "id": "arrow_iPQlyrajX",
+            "targetId": "jWZQFSuFck3",
+            "type": "Arrow"
+          }
+        ],
+        "screenConfiguration": [],
+        "type": "FlowUserTask"
+      },
+      {
+        "actionsList": [
+          {
+            "actionId": "4R06QkImp1",
+            "actionType": "StateIn",
+            "name": "InUserTask0_2",
+            "symbol": "InUserTask0_2"
+          },
+          {
+            "actionId": "0ypDFSXihe",
+            "actionType": "StateOut",
+            "name": "OutUserTask0_2",
+            "symbol": "OutUserTask0_2"
+          }
+        ],
+        "enabled": true,
+        "fieldConfiguration": [],
+        "id": "AU21puu7Xk",
+        "name": "ut025_Odrzucenie",
+        "relations": [],
+        "screenConfiguration": [],
+        "type": "FlowUserTask"
+      },
+      {
+        "actionsList": [
+          {
+            "actionId": "TyVlLScGCjK",
+            "actionType": "StateIn",
+            "name": "InUserTask0_3",
+            "symbol": "InUserTask0_3"
+          },
+          {
+            "actionId": "9bftC4RVU",
+            "actionType": "Standard",
+            "name": "a040_validateDiscountCode",
+            "symbol": "a040_validateDiscountCode"
+          },
+          {
+            "actionId": "ms8dgNgGJPz",
+            "actionType": "StateOut",
+            "name": "OutUserTask0_3",
+            "symbol": "OutUserTask0_3"
+          },
+          {
+            "actionId": "SkHPAx9bjg",
+            "actionType": "Standard",
+            "name": "a040_nextStatus",
+            "symbol": "a040_nextStatus"
+          }
+        ],
+        "enabled": true,
+        "fieldConfiguration": [],
+        "id": "jWZQFSuFck3",
+        "name": "ut040_KodRabatowy",
+        "relations": [
+          {
+            "id": "arrow_SI5CB5AkV",
+            "targetId": "B3ZwwaTRArz",
+            "type": "Arrow"
+          }
+        ],
+        "screenConfiguration": [],
+        "type": "FlowUserTask"
+      },
+      {
+        "actionsList": [
+          {
+            "actionId": "AdMj4DGAFcn",
+            "actionType": "StateIn",
+            "name": "InUserTask0_4",
+            "symbol": "InUserTask0_4"
+          },
+          {
+            "actionId": "dVAPjHT5P",
+            "actionType": "Standard",
+            "name": "a050_wyslij",
+            "symbol": "a050_wyslij"
+          },
+          {
+            "actionId": "qRvmlP7rhnK",
+            "actionType": "StateOut",
+            "name": "OutUserTask0_4",
+            "symbol": "OutUserTask0_4"
+          }
+        ],
+        "enabled": true,
+        "fieldConfiguration": [],
+        "id": "B3ZwwaTRArz",
+        "name": "ut050_Podsumowanie",
+        "relations": [
+          {
+            "id": "arrow_L8TE5O2ob",
+            "targetId": "7ESQ4e3wW1",
+            "type": "Arrow"
+          }
+        ],
+        "screenConfiguration": [],
+        "type": "FlowUserTask"
+      },
+      {
+        "actionsList": [],
+        "enabled": true,
+        "fieldConfiguration": [],
+        "id": "7ESQ4e3wW1",
+        "name": "EndEvent0",
+        "relations": [],
+        "screenConfiguration": [],
+        "type": "FlowEndEvent"
+      }
+    ],
+    "location": "https://uamedu.domdata.com/architect/bpmnDesigner"
+  }
+}

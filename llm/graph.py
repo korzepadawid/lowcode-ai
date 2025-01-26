@@ -3,6 +3,9 @@ from typing import List, Optional, TypedDict
 
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import BaseMessage
+
+from cluster_extraction.cluster_extraction import cluster_graph
+from cluster_extraction.context_processor import process_fields_to_graph
 from llm.base import LLMBase
 from llm.bielik import BielikLLM
 from llm.openai2 import OpenAILangChainV2
@@ -74,24 +77,8 @@ def generate_rule(state: GraphState) -> dict:
     When writing C# code, use the available process fields and screens to manage client data and user interface. Follow these guidelines:
 
     ## 1. Available Process Fields:
-    - `PF.UR_DaneKlienta_S.Imie` : String
-    - `PF.UR_DaneKlienta_S.Nazwisko` : String
-    - `PF.UR_DaneKlienta_S.Email` : String
-    - `PF.UR_DaneKlienta_S.NrTelefonu` : String
-    - `PF.UR_DaneKlienta_S.PESEL` : String
     
-    - `PF.UR_DaneRodziny_T` : table
-        * Imie
-        * Nazwisko 
-        * Wiek
-        
-    - `PF.UR_KodZnizkowy` : String
-    - `PF.UR_OdrzuceniePrzezWiek` : Bool
-    - `PF.UR_PoziomUbezpieczenia` : String
-    - `PF.UR_RodzajUbezpieczenia` : String
-    - `PF.UR_Skladka` : Decimal
-    - `PF.UR_UbezpieczenieDodatkowe` : Bool
-    - `PF.tech_Message` : String
+{data_model}
     
 
     ### Properties:
@@ -162,7 +149,9 @@ def generate_rule(state: GraphState) -> dict:
     Always remember: respond with code only, unless instructed otherwise.
     """
 
-
+    data_model = cluster_graph(state["context"]["fields"], query=state["question"])
+    template = template.format(data_model=data_model)
+    print(template)
 
     llm = OpenAILangChainV2(template)
     llm.chat_history = state["messages"]

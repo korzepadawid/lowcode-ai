@@ -208,22 +208,13 @@ def mapreduce(
     return context
 
 
-
-def main() -> None:
-    with open("context.json", "r") as f:
-        context = json.load(f)
-    fields = context["context"]["fields"]
+def cluster_graph(fields, query) -> str:
 
     G = process_fields_to_graph(fields)
-
     communities = detect_communities(G)
-    query = "Sprawdź czy w rodzinie istnieje osoba starsza niż 85 lat, jeśli tak zmień składkę podstawową na 107 * ilość osób w rodzinie."
     logger.info("Query:", query)
     answer = mapreduce(G, query, communities)
     print(f"Answer:{answer}")
 
-    print(parse_nodes_to_prompt(answer))
-
-
-if __name__ == "__main__":
-    main()
+    parsed_answer = parse_nodes_to_prompt(answer)
+    return parsed_answer

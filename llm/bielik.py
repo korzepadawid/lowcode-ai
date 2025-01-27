@@ -45,3 +45,10 @@ class BielikLLM(LLMBase):
         return self.llm_chain.invoke(
             input={"input": input_query, "chat_history": self.chat_history}
         )
+
+
+
+template = "You are a code writing assistant specializing in python"
+llm = BielikLLM(template)
+
+answer = llm.predict("hi")

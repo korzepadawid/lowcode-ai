@@ -5,7 +5,6 @@ from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import BaseMessage
 
 from cluster_extraction.cluster_extraction import cluster_graph
-from cluster_extraction.context_processor import process_fields_to_graph
 from llm.base import LLMBase
 from llm.bielik import BielikLLM
 from llm.openai2 import OpenAILangChainV2
@@ -74,13 +73,13 @@ def generate_rule(state: GraphState) -> dict:
 
     # Universal Prompt for C# Code Generation for Client Data and Screens Management
 
-    When writing C# code, use the available process fields and screens to manage client data and user interface. Follow these guidelines:
+    When writing only in C# code, use the available process fields and screens to manage client data and user interface. Follow these guidelines:
 
     ## 1. Available Process Fields:
     
 {data_model}
     
-
+    
     ### Properties:
     Fields have the following properties:
     - `HasValue`, `IsEditable`, `IsRequired`, `IsVisible`, `Value`.

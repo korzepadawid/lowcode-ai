@@ -30,7 +30,7 @@ class CodestralLLM(LLMBase):
     def add_history(self, user: str, ai: str) -> None:
         self.chat_history.extend([HumanMessage(content=user), ai])
 
-    def predict(self, input_query: str) -> dict:
+    def predict(self, input_query: str) -> str:
         return self.llm_chain.invoke(
             input={"input": input_query, "chat_history": self.chat_history}
         )

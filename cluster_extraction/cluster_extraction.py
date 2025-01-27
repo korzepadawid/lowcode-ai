@@ -18,7 +18,7 @@ from pydantic import Field, BaseModel
 import networkx as nx
 from langchain_core.output_parsers import PydanticOutputParser
 
-from context_processor import process_fields_to_graph, parse_nodes_to_prompt
+from cluster_extraction.context_processor import process_fields_to_graph, parse_nodes_to_prompt
 
 load_dotenv()
 
@@ -218,3 +218,4 @@ def cluster_graph(fields, query) -> str:
 
     parsed_answer = parse_nodes_to_prompt(answer)
     return parsed_answer
+
